@@ -1,0 +1,32 @@
+<app-page-header title="Bug Stories" subtitle="Business-friendly bug reports generated from error clusters" />
+
+<app-error-boundary [loading]="stories.loading() && !stories.data()" [error]="stories.error()" (retry)="stories.load()">
+  @if (stories.data()?.length === 0) {
+    <app-empty-state icon="bug_report" title="No bug stories yet" message="Open an error cluster and choose “Generate Bug Story”.">
+      <a mat-flat-button routerLink="/clusters">Browse clusters</a>
+    </app-empty-state>
+  }
+  <div class="list">
+    @for (s of stories.data(); track s.id) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>{{ s.title }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ s.id }} · Cluster <a [routerLink]="['/clusters', s.clusterId]">{{ s.clusterId }}</a> · Updated {{ s.updatedAt | date: 'medium' }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <app-severity-chip [severity]="s.severity" />
+          <p class="desc">{{ summary(s.description) }}</p>
+          <p class="impact"><strong>Business impact:</strong> {{ summary(s.businessImpact, 200) }}</p>
+          <p class="more">{{ s.acceptanceCriteria.length }} acceptance criteria · open <strong>View</strong> for the full story</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button type="button" (click)="open(s, 'view')"><mat-icon>visibility</mat-icon>View</button>
+          <button mat-button type="button" (click)="open(s, 'edit')"><mat-icon>edit</mat-icon>Edit</button>
+          <button mat-button type="button" (click)="exporter.downloadBugStoryMarkdown(s)"><mat-icon>download</mat-icon>Download Markdown</button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</app-error-boundary>

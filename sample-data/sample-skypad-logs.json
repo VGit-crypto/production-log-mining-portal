@@ -1,0 +1,888 @@
+[
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-12T11:23:24.660Z",
+    "correlationId": "73d71b41-8c58-458e-a578-ec6b0abb634d"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-12T11:24:22.771Z",
+    "correlationId": "b23a36d5-e54a-46f3-8e2f-408036dad239"
+  },
+  {
+    "timestamp": "2026-11-12T11:28:07.050Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "FlightSchedulerJobService",
+    "context": "FlightSchedulerJobService.sync",
+    "message": "Flight sync job failed",
+    "error": "Error: 504 Gateway Timeout: Read timed out after 30000ms",
+    "correlationId": "2cb1afc5-537a-45f2-a358-a6421bb314d8",
+    "http": {
+      "statusCode": 504,
+      "url": "https://sched.example.test/v1/flights/sync"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-12T11:38:49.933Z",
+    "correlationId": "6c317e4f-5114-440a-8f82-2c02b3f1bfa8"
+  },
+  {
+    "timestamp": "2026-11-12T12:51:13.847Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "FlightSchedulerJobService",
+    "context": "FlightSchedulerJobService.sync",
+    "message": "Flight sync job failed",
+    "error": "Error: 504 Gateway Timeout: Read timed out after 30000ms",
+    "correlationId": "20c7fe86-5c77-48da-9a68-c5f8302ad5ba",
+    "http": {
+      "statusCode": 504,
+      "url": "https://sched.example.test/v1/flights/sync"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-12T14:08:57.757Z",
+    "correlationId": "a5ce1ae2-c7a8-47d6-9c8e-546adcb3f407"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-12T16:14:45.937Z",
+    "correlationId": "c12ebed1-4ae3-4dab-aeb5-403fa7bdc095"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-12T19:35:15.929Z",
+    "correlationId": "22da00ab-4738-4d31-92c1-0fe49526b501"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T01:13:01.266Z",
+    "correlationId": "1494e237-4583-4afc-9451-b31a184a868f"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T01:21:22.254Z",
+    "correlationId": "43c6dec9-edde-43e3-b6a1-b38bb58032d7"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T03:14:15.879Z",
+    "correlationId": "cd6863f6-ca41-456f-8a2e-0d2b22558609"
+  },
+  {
+    "timestamp": "2026-11-13T04:35:41.337Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "82fb1f5b-8efc-42f8-af7e-fb23dbd47ff8",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T06:06:26.772Z",
+    "correlationId": "28eabf94-8bbd-49d9-ba4e-8d98cdbdc14f"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T06:48:01.346Z",
+    "correlationId": "c4e5387b-15c3-484f-b562-bdf5b2b8514c"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T07:05:30.927Z",
+    "correlationId": "85d2413a-701a-4c6f-b5c8-e1de0e6fee9d"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T08:02:29.275Z",
+    "correlationId": "50f817f8-95cf-4c4b-a6e1-41be60e13675"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T08:16:03.948Z",
+    "correlationId": "64c85240-223a-4be4-beca-68727cca9f3c"
+  },
+  {
+    "timestamp": "2026-11-13T10:31:11.981Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "ea7b9277-4955-49bc-a1a9-3889c0389f7d",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T12:00:12.913Z",
+    "correlationId": "f2feca3e-879a-42c7-9b94-b89c55dadb6e"
+  },
+  {
+    "timestamp": "2026-11-13T12:12:12.709Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "8639f292-f162-49ce-b59a-b0bf4f87062b",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T12:46:08.683Z",
+    "correlationId": "9fa9bc71-1fc3-488d-a0fa-d83c196ae39a"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T15:11:08.899Z",
+    "correlationId": "2d42f329-0626-4e15-b49c-739b921ac300"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T17:37:43.204Z",
+    "correlationId": "9b8517e5-8fe6-4844-b98a-358e7b905935"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T18:53:17.716Z",
+    "correlationId": "624f84d1-0a8a-4115-a32a-3c95a71afc3e"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T19:04:40.916Z",
+    "correlationId": "ace78c99-c23b-4547-8bbf-a4334ecd327b"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T21:33:43.121Z",
+    "correlationId": "05ada134-95bf-4ff1-a9a3-a81541d2b8e3"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-13T23:02:29.219Z",
+    "correlationId": "563fbe83-fbb2-4256-a45d-7658f0279b46"
+  },
+  {
+    "timestamp": "2026-11-14T02:32:23.714Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "3f46551c-b4aa-4601-9c9e-d460b14f1913",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T02:51:28.237Z",
+    "correlationId": "dd12bfb5-d1e4-4a0a-88d8-a1fccd631fa0"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T04:33:25.859Z",
+    "correlationId": "88b3c926-2f5a-48ca-89bb-8645a7a85ca9"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T04:59:54.083Z",
+    "correlationId": "11807b99-6f86-476a-87d5-e1250537f023"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T06:29:10.004Z",
+    "correlationId": "a2c68e7f-b167-44f6-b9b4-de2d4543540a"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T06:55:15.274Z",
+    "correlationId": "1a4be753-970b-4a92-914f-51159a3754d1"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T07:40:19.240Z",
+    "correlationId": "7ed955e1-fcd6-4c71-9cf2-94cf5603a618"
+  },
+  {
+    "timestamp": "2026-11-14T12:44:42.214Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "c29774d5-7a19-44a9-90e0-bb256a747097",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "timestamp": "2026-11-14T13:13:11.138Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "0c648b13-c150-4892-ae54-74956cd0e4d1",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T14:45:00.858Z",
+    "correlationId": "aeea055b-2157-4ad5-8550-bf1595c99c38"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T15:28:36.220Z",
+    "correlationId": "3cc6125b-0788-413a-86ab-0d23fae25f17"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T15:47:24.471Z",
+    "correlationId": "0e0f3995-2f15-4fee-8363-2dbebf95d8e7"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T18:04:43.057Z",
+    "correlationId": "312b4eb1-930f-4f66-934d-e370b03cfbfc"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T18:08:49.688Z",
+    "correlationId": "37eaf00d-884f-448a-89da-87c1d5d66424"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T18:25:53.615Z",
+    "correlationId": "de4ec4df-0d8b-4277-8e77-ea316ff4375b"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-14T22:24:13.309Z",
+    "correlationId": "e1eda380-d9f1-4c03-bd72-0f46c80e624d"
+  },
+  {
+    "timestamp": "2026-11-14T22:29:53.656Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "FlightSchedulerJobService",
+    "context": "FlightSchedulerJobService.sync",
+    "message": "Flight sync job failed",
+    "error": "Error: 504 Gateway Timeout: Read timed out after 30000ms",
+    "correlationId": "bfa406dd-c6d2-4b89-90ff-0d37c27a908d",
+    "http": {
+      "statusCode": 504,
+      "url": "https://sched.example.test/v1/flights/sync"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T00:32:59.684Z",
+    "correlationId": "c90b8879-bc4a-48a7-b19a-ce53189e4922"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T01:07:47.915Z",
+    "correlationId": "092153c0-9966-4760-b9ce-4dcd8378063c"
+  },
+  {
+    "timestamp": "2026-11-15T01:21:37.465Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "FlightSchedulerJobService",
+    "context": "FlightSchedulerJobService.sync",
+    "message": "Flight sync job failed",
+    "error": "Error: 504 Gateway Timeout: Read timed out after 30000ms",
+    "correlationId": "87027533-7857-4826-b88e-5526457a014e",
+    "http": {
+      "statusCode": 504,
+      "url": "https://sched.example.test/v1/flights/sync"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T01:41:56.541Z",
+    "correlationId": "ee394128-454f-4dcd-9e57-819112f825ee"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T02:14:19.219Z",
+    "correlationId": "b20fa5ea-0215-406f-bbc2-b1a481ead247"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T02:30:26.151Z",
+    "correlationId": "49540cfc-31ca-43ae-9c62-14955d055cc0"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T03:24:55.232Z",
+    "correlationId": "bd506c5e-1ee4-4a37-acc2-3e975d04cec3"
+  },
+  {
+    "timestamp": "2026-11-15T06:49:04.298Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "9f2da90c-18d6-4b2f-a9d9-4a5f224150b9",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "timestamp": "2026-11-15T08:28:34.395Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "2cbd9d06-282c-41be-a080-5166cb49c663",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T10:06:54.994Z",
+    "correlationId": "1a21e807-86f4-461e-97b3-6040ebff4a96"
+  },
+  {
+    "timestamp": "2026-11-15T11:39:29.443Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "7d6b1cf9-2663-4ba7-b170-49dd2e1cec80",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "timestamp": "2026-11-15T12:57:44.746Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "75b6cac3-5187-40ba-a9b0-05865dfa7366",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T13:37:56.874Z",
+    "correlationId": "b20d0f64-47d7-4dba-b68e-6b9a22a7fd24"
+  },
+  {
+    "timestamp": "2026-11-15T13:44:17.000Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "1fcfdcec-8525-4c2f-9143-9166665eda22",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T14:30:30.513Z",
+    "correlationId": "3fa69a8e-28cf-47d9-a66c-6fd6ebd23383"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T15:06:55.722Z",
+    "correlationId": "0998464b-26ec-4f8e-914e-fb2e3bd49b68"
+  },
+  {
+    "timestamp": "2026-11-15T16:13:11.348Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "ee08d997-0cfd-4ce2-8a02-771017e00de9",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "timestamp": "2026-11-15T17:19:42.002Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "ae3a7220-f57c-47fd-a475-b3f9ca7884f6",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-15T17:49:49.939Z",
+    "correlationId": "88a78b95-f569-414a-8b71-c1ffeb25f571"
+  },
+  {
+    "timestamp": "2026-11-16T02:33:24.238Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "cf096fc9-dc20-4f68-bbc5-599e0e94040a",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T07:40:56.451Z",
+    "correlationId": "9348b587-72c5-4d6c-b1ba-1bd6af5c9d58"
+  },
+  {
+    "timestamp": "2026-11-16T08:19:41.154Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "ada954ac-395a-4421-85da-39c3a08662d2",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "timestamp": "2026-11-16T08:58:41.848Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "649c2cc8-ff52-49cd-985e-c632f4da13f2",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "timestamp": "2026-11-16T09:10:59.360Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "00adb1e0-24a6-480e-90ad-cb1c46cd972a",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "timestamp": "2026-11-16T09:23:40.753Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "FlightSchedulerJobService",
+    "context": "FlightSchedulerJobService.sync",
+    "message": "Flight sync job failed",
+    "error": "Error: 504 Gateway Timeout: Read timed out after 30000ms",
+    "correlationId": "d9bb21ce-db9d-4f11-aa13-044526b012de",
+    "http": {
+      "statusCode": 504,
+      "url": "https://sched.example.test/v1/flights/sync"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T09:36:15.942Z",
+    "correlationId": "32cc6ef6-124d-407f-affb-17231b08fcc1"
+  },
+  {
+    "timestamp": "2026-11-16T10:04:40.252Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "FlightSchedulerJobService",
+    "context": "FlightSchedulerJobService.sync",
+    "message": "Flight sync job failed",
+    "error": "Error: 504 Gateway Timeout: Read timed out after 30000ms",
+    "correlationId": "edda55f1-3936-4445-acaf-40e648925f86",
+    "http": {
+      "statusCode": 504,
+      "url": "https://sched.example.test/v1/flights/sync"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T10:13:09.594Z",
+    "correlationId": "dba34262-6c21-4a20-ae55-6e3855d99981"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T10:51:23.984Z",
+    "correlationId": "981dca10-3059-4677-9a78-28e11e38dca5"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T11:23:47.273Z",
+    "correlationId": "0a04ab7d-8bec-4dc6-a62f-c8e4339b0bd8"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T11:48:55.760Z",
+    "correlationId": "d85e8483-82e6-4009-9e42-3180e04cc4d4"
+  },
+  {
+    "timestamp": "2026-11-16T15:30:06.290Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "8038ddde-71a8-4314-8fa7-528f6fadf6dd",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "timestamp": "2026-11-16T18:20:19.738Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "4739d0bc-0d71-4157-96bd-7bf090f61e71",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T19:19:09.328Z",
+    "correlationId": "363381a7-2adb-4c51-8ecd-71357d0b2cc0"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T19:52:24.492Z",
+    "correlationId": "20dd7e82-f9dc-4b8d-9d4c-518570169da7"
+  },
+  {
+    "timestamp": "2026-11-16T20:04:27.922Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "5a6fa485-aa02-4af8-b6ff-ce23e9dd47f6",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-16T23:51:18.138Z",
+    "correlationId": "5801f85a-d35f-4264-b39e-25e4a7c42e41"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-17T01:22:45.507Z",
+    "correlationId": "9523bc0e-6215-4f15-94c7-178a9cdbd70b"
+  },
+  {
+    "timestamp": "2026-11-17T01:43:16.714Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "PassengerInfoService",
+    "context": "PassengerInfoService.fetch",
+    "message": "Passenger info request failed",
+    "error": "AxiosError: Request failed with status code 404\n    at settle (axios.js:19:12)\n    at PassengerInfoService.fetch (passenger-info.service.ts:41:9)",
+    "correlationId": "ff449d07-caf8-4270-b2f0-47cbd6d68a4d",
+    "http": {
+      "statusCode": 404,
+      "url": "https://datahub.example.test/v2/passenger-info"
+    }
+  },
+  {
+    "timestamp": "2026-11-17T02:29:48.867Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "fa668d57-d5d0-449e-a3cf-34bf523cde44",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-17T03:23:43.140Z",
+    "correlationId": "d7e40d69-8cc7-4246-98a2-ebb467901c7b"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-17T03:31:25.388Z",
+    "correlationId": "25819cef-a325-44d8-9cb0-e38ada18a7e4"
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-17T04:38:30.993Z",
+    "correlationId": "0927e1fa-097d-4f59-a2a0-7f0cc2928b1a"
+  },
+  {
+    "timestamp": "2026-11-17T04:48:29.811Z",
+    "level": "error",
+    "appName": "Skypad-IFM",
+    "service": "GuestPreferencesService",
+    "context": "GuestPreferencesService.getGuests",
+    "message": "No guests returned for flight XY216 AUH-DEL on 291026",
+    "error": "Error: Guest Preferences API returned an empty guest list\n    at GuestPreferencesService.getGuests (guest-preferences.service.ts:88:13)",
+    "correlationId": "a569d8ef-109f-4704-a6a2-4dbea5f4b422",
+    "http": {
+      "statusCode": 200,
+      "url": "https://api.example.test/v1/guest-preferences?flight=XY216&date=291026"
+    }
+  },
+  {
+    "appName": "Skypad-IFM",
+    "service": "Gateway",
+    "level": "info",
+    "message": "request ok",
+    "timestamp": "2026-11-17T07:51:59.005Z",
+    "correlationId": "add70368-79d8-44a0-8b5e-176538e10f81"
+  }
+]

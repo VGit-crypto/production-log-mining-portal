@@ -1,0 +1,67 @@
+<app-page-header title="Error Clusters" subtitle="Similar errors grouped by normalized signature" />
+
+<app-error-boundary [loading]="clusters.loading() && !clusters.data()" [error]="clusters.error()" (retry)="clusters.load()">
+  @if (clusters.data()?.length === 0) {
+    <app-empty-state icon="bubble_chart" title="No error clusters" message="Upload logs to create clusters." />
+  } @else {
+    <div class="toolbar-row">
+      <mat-form-field class="grow">
+        <mat-label>Search</mat-label>
+        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+        <input matInput type="search" [value]="search()" (input)="search.set($any($event.target).value)" placeholder="Id, signature, module, category" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Severity</mat-label>
+        <mat-select [value]="severity()" (selectionChange)="severity.set($event.value)">
+          <mat-option value="">All</mat-option>
+          @for (s of severities; track s) { <mat-option [value]="s">{{ s }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Category</mat-label>
+        <mat-select [value]="category()" (selectionChange)="category.set($event.value)">
+          <mat-option value="">All</mat-option>
+          @for (c of categories(); track c) { <mat-option [value]="c">{{ c }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="table-wrap">
+      <table mat-table [dataSource]="ds" matSort matSortActive="occurrences" matSortDirection="desc" aria-label="Error clusters">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cluster Id</th>
+          <td mat-cell *matCellDef="let c"><a class="mono" [routerLink]="[c.id]" (click)="$event.stopPropagation()">{{ c.id }}</a></td>
+        </ng-container>
+        <ng-container matColumnDef="signature">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Error Signature</th>
+          <td mat-cell *matCellDef="let c" class="sig" [title]="c.signature">{{ c.signature }}</td>
+        </ng-container>
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+          <td mat-cell *matCellDef="let c">{{ c.category }}</td>
+        </ng-container>
+        <ng-container matColumnDef="severity">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Severity</th>
+          <td mat-cell *matCellDef="let c"><app-severity-chip [severity]="c.severity" /></td>
+        </ng-container>
+        <ng-container matColumnDef="occurrences">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Occurrences</th>
+          <td mat-cell *matCellDef="let c">{{ c.occurrences | number }}</td>
+        </ng-container>
+        <ng-container matColumnDef="lastSeen">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Seen</th>
+          <td mat-cell *matCellDef="let c">{{ c.lastSeen | date: 'medium' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="confidenceScore">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Confidence Score</th>
+          <td mat-cell *matCellDef="let c">{{ c.confidenceScore | percent }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns" class="row" (click)="open(row)"></tr>
+        <tr class="mat-row" *matNoDataRow><td class="mat-cell empty" [attr.colspan]="columns.length">No clusters match your filters.</td></tr>
+      </table>
+    </div>
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" [pageSize]="10" showFirstLastButtons aria-label="Select page of clusters" />
+  }
+</app-error-boundary>

@@ -1,0 +1,87 @@
+<a mat-button routerLink="/clusters" class="back"><mat-icon>arrow_back</mat-icon>All clusters</a>
+@if (busy()) {
+  <p class="busy" role="status">AI agent is working. This can take up to a minute…</p>
+}
+
+<app-error-boundary [loading]="page.loading() && !page.data()" [error]="page.error()" (retry)="page.load()">
+  @if (page.data(); as d) {
+    <app-page-header [title]="d.cluster.bugTitle" [subtitle]="d.cluster.id + ' · ' + locationLabel(d.cluster)">
+      <button mat-flat-button type="button" (click)="generateBug(d.bugs.length > 0)" [disabled]="busy()">
+        <mat-icon>bug_report</mat-icon>{{ d.bugs.length ? 'Regenerate Bug Story' : 'Generate Bug Story' }}
+      </button>
+      <button mat-stroked-button type="button" (click)="generateTests()" [disabled]="busy()">
+        <mat-icon>fact_check</mat-icon>{{ d.tests.length ? 'Regenerate Test Cases' : 'Generate Test Cases' }}
+      </button>
+    </app-page-header>
+
+    <mat-tab-group [selectedIndex]="tab()" (selectedIndexChange)="tab.set($event)" animationDuration="0ms">
+      <mat-tab label="Overview">
+        <div class="panel">
+          <section class="facts card-grid" aria-label="Key facts">
+            <mat-card appearance="outlined"><mat-card-content><div class="k">Severity</div><app-severity-chip [severity]="d.cluster.severity" /></mat-card-content></mat-card>
+            <mat-card appearance="outlined"><mat-card-content><div class="k">Frequency
+              <button mat-icon-button type="button" class="info" (click)="showFrequencyInfo(d.cluster)"
+                      aria-label="How is this frequency counted?" matTooltip="How is this frequency counted?">
+                <mat-icon>info</mat-icon>
+              </button>
+            </div><div class="v">{{ d.cluster.occurrences | number }} occurrences</div></mat-card-content></mat-card>
+            <mat-card appearance="outlined"><mat-card-content><div class="k">Category</div><div class="v">{{ d.cluster.category }}</div></mat-card-content></mat-card>
+            <mat-card appearance="outlined"><mat-card-content><div class="k">Confidence</div><div class="v">{{ d.cluster.confidenceScore | percent }}</div></mat-card-content></mat-card>
+          </section>
+
+          <h2>Error summary</h2>
+          <p>{{ d.cluster.summary }}</p>
+          <p class="mono pre sig">{{ d.cluster.signature }}</p>
+          <p class="muted">First seen {{ d.cluster.firstSeen | date: 'medium' }} · Last seen {{ d.cluster.lastSeen | date: 'medium' }}</p>
+
+          <h2>Business impact</h2>
+          <p>{{ d.cluster.businessImpact }}</p>
+
+          <h2>Related log samples · all {{ d.cluster.occurrences | number }} occurrences</h2>
+          <app-cluster-occurrences [clusterId]="d.cluster.id" [expected]="d.cluster.occurrences" />
+        </div>
+      </mat-tab>
+
+      <mat-tab label="RCA">
+        <div class="panel">
+          <h2>Root cause analysis</h2>
+          <app-markdown-view [source]="d.cluster.rootCause" />
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'Related Bugs (' + d.bugs.length + ')'">
+        <div class="panel">
+          @for (b of d.bugs; track b.id) {
+            <mat-card appearance="outlined" class="sample">
+              <mat-card-header><mat-card-title>{{ b.title }}</mat-card-title><mat-card-subtitle>{{ b.id }}</mat-card-subtitle></mat-card-header>
+              <mat-card-content><app-severity-chip [severity]="b.severity" /><p>{{ b.description }}</p></mat-card-content>
+              <mat-card-actions><a mat-button routerLink="/bug-stories">Open in Bug Stories</a>
+                <button mat-button type="button" (click)="downloadMd(b)">Download Markdown</button></mat-card-actions>
+            </mat-card>
+          } @empty {
+            <app-empty-state icon="bug_report" title="No bug story yet" message="Use “Generate Bug Story” to create one for this cluster." />
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="'Generated Tests (' + d.tests.length + ')'">
+        <div class="panel">
+          @if (d.tests.length) {
+            <div class="table-wrap">
+              <table mat-table [dataSource]="d.tests" aria-label="Generated test cases">
+                <ng-container matColumnDef="id"><th mat-header-cell *matHeaderCellDef>ID</th><td mat-cell *matCellDef="let t" class="mono">{{ t.id }}</td></ng-container>
+                <ng-container matColumnDef="scenario"><th mat-header-cell *matHeaderCellDef>Scenario</th><td mat-cell *matCellDef="let t">{{ t.scenario }}</td></ng-container>
+                <ng-container matColumnDef="priority"><th mat-header-cell *matHeaderCellDef>Priority</th><td mat-cell *matCellDef="let t"><app-severity-chip [severity]="t.priority" /></td></ng-container>
+                <tr mat-header-row *matHeaderRowDef="testColumns"></tr>
+                <tr mat-row *matRowDef="let r; columns: testColumns"></tr>
+              </table>
+            </div>
+            <p><a mat-button routerLink="/test-cases">View full steps and export</a></p>
+          } @else {
+            <app-empty-state icon="fact_check" title="No test cases yet" message="Use “Generate Test Cases” to create regression tests." />
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</app-error-boundary>

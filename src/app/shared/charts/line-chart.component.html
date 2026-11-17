@@ -1,0 +1,18 @@
+@if (points().length) {
+  <svg viewBox="0 0 640 240" role="img" [attr.aria-label]="label() + ': ' + summary()" preserveAspectRatio="xMidYMid meet">
+    @for (t of yTicks(); track t.y) {
+      <line [attr.x1]="pad" [attr.x2]="640 - 12" [attr.y1]="t.y" [attr.y2]="t.y" stroke="#e3e8ef" />
+      <text [attr.x]="pad - 8" [attr.y]="t.y + 4" text-anchor="end" class="axis">{{ t.v }}</text>
+    }
+    <path [attr.d]="area()" fill="#1a4b8c" fill-opacity=".1" />
+    <polyline [attr.points]="line()" fill="none" stroke="#1a4b8c" stroke-width="2.5" stroke-linejoin="round" />
+    @for (p of points(); track p.label) {
+      <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4" fill="#1a4b8c"><title>{{ p.label }}: {{ p.value }}</title></circle>
+    }
+    @for (x of xTicks(); track x.label) {
+      <text [attr.x]="x.x" y="228" text-anchor="middle" class="axis">{{ x.label }}</text>
+    }
+  </svg>
+} @else {
+  <p class="empty">No trend data yet.</p>
+}

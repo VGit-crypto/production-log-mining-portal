@@ -1,0 +1,65 @@
+<app-page-header title="Test Cases" subtitle="Regression test cases generated from error clusters">
+  <button mat-stroked-button type="button" (click)="csv()" [disabled]="!ds.data.length"><mat-icon>table_view</mat-icon>Export CSV</button>
+  <button mat-flat-button type="button" (click)="excel()" [disabled]="!ds.data.length"><mat-icon>grid_on</mat-icon>Export Excel</button>
+</app-page-header>
+
+@if (status().pendingClusters > 0) {
+  <p class="banner" role="status">
+    <mat-icon aria-hidden="true">autorenew</mat-icon>
+    AI is generating test cases for {{ status().pendingClusters }} cluster(s). This list refreshes automatically.
+  </p>
+}
+@if (status().failedClusters > 0) {
+  <p class="banner warn" role="alert">
+    <mat-icon aria-hidden="true">warning</mat-icon>
+    Test-case generation failed for {{ status().failedClusters }} cluster(s). Open the cluster and choose “Regenerate Test Cases”.
+    @if (status().lastError; as err) { <br /><small>Last error: {{ err }}</small> }
+  </p>
+}
+
+<app-error-boundary [loading]="tests.loading() && !tests.data()" [error]="tests.error()" (retry)="tests.load()">
+  @if (tests.data()?.length === 0) {
+    <app-empty-state icon="fact_check" title="No test cases yet" message="Test cases are generated automatically when logs are uploaded.">
+      <a mat-flat-button routerLink="/upload">Upload logs</a>
+    </app-empty-state>
+  } @else {
+    <mat-form-field class="search">
+      <mat-label>Search test cases</mat-label>
+      <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+      <input matInput type="search" (input)="filter($any($event.target).value)" placeholder="Id, scenario, steps" />
+    </mat-form-field>
+
+    <div class="table-wrap">
+      <table mat-table [dataSource]="ds" matSort aria-label="Generated test cases">
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Test Case ID</th>
+          <td mat-cell *matCellDef="let t" class="mono nowrap">{{ t.id }}</td>
+        </ng-container>
+        <ng-container matColumnDef="scenario">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Test Scenario</th>
+          <td mat-cell *matCellDef="let t" class="wide">{{ t.scenario }}</td>
+        </ng-container>
+        <ng-container matColumnDef="preconditions">
+          <th mat-header-cell *matHeaderCellDef>Preconditions</th>
+          <td mat-cell *matCellDef="let t"><ul>@for (x of t.preconditions; track $index) { <li>{{ x }}</li> }</ul></td>
+        </ng-container>
+        <ng-container matColumnDef="steps">
+          <th mat-header-cell *matHeaderCellDef>Test Steps</th>
+          <td mat-cell *matCellDef="let t"><ol>@for (x of t.steps; track $index) { <li>{{ x }}</li> }</ol></td>
+        </ng-container>
+        <ng-container matColumnDef="expectedResults">
+          <th mat-header-cell *matHeaderCellDef>Expected Results</th>
+          <td mat-cell *matCellDef="let t"><ul>@for (x of t.expectedResults; track $index) { <li>{{ x }}</li> }</ul></td>
+        </ng-container>
+        <ng-container matColumnDef="priority">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Priority</th>
+          <td mat-cell *matCellDef="let t"><app-severity-chip [severity]="t.priority" /></td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        <tr class="mat-row" *matNoDataRow><td class="mat-cell empty" [attr.colspan]="columns.length">No test cases match your search.</td></tr>
+      </table>
+    </div>
+    <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons aria-label="Select page of test cases" />
+  }
+</app-error-boundary>

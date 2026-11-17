@@ -1,0 +1,74 @@
+<app-page-header title="Upload Logs" subtitle="Upload production logs to detect, cluster and analyze errors" />
+
+<mat-card appearance="outlined">
+  <mat-card-content>
+    <div
+      class="dropzone"
+      role="button"
+      tabindex="0"
+      [class.drag]="dragging()"
+      [class.busy]="busy()"
+      [attr.aria-disabled]="busy()"
+      aria-describedby="upload-hint"
+      (click)="!busy() && picker.click()"
+      (keydown.enter)="!busy() && picker.click()"
+      (keydown.space)="$event.preventDefault(); !busy() && picker.click()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="dragging.set(false)"
+      (drop)="onDrop($event)"
+    >
+      <mat-icon aria-hidden="true">cloud_upload</mat-icon>
+      <p class="main">Drag and drop a log file here, or <span class="link">browse</span></p>
+      <p id="upload-hint" class="hint">
+        {{ accepted }} · up to {{ maxMb }} MB · JSON array/object or newline-delimited JSON
+      </p>
+      <input #picker type="file" hidden [accept]="accepted" (change)="onPick($event, picker)" aria-label="Choose log file" />
+    </div>
+
+    @if (phase() !== 'idle') {
+      <div class="progress" role="status" aria-live="polite">
+        <div class="row">
+          <mat-icon aria-hidden="true">description</mat-icon>
+          <strong class="name">{{ fileName() }}</strong>
+          <span class="phase">{{ phaseLabel() }}</span>
+        </div>
+        @if (phase() === 'uploading') {
+          <mat-progress-bar mode="determinate" [value]="percent()" [attr.aria-label]="'Upload progress ' + percent() + '%'" />
+        } @else if (phase() === 'validating' || phase() === 'processing') {
+          <mat-progress-bar mode="indeterminate" aria-label="Working" />
+        }
+      </div>
+    }
+
+    @if (error(); as e) {
+      <div class="error" role="alert"><mat-icon aria-hidden="true">error</mat-icon><span>{{ e }}</span></div>
+    }
+
+    @if (result(); as r) {
+      <section class="result" aria-label="Upload result">
+        <h2>Analysis complete</h2>
+        <dl>
+          <div><dt>Log records</dt><dd>{{ r.totalRecords.toLocaleString() }}</dd></div>
+          <div><dt>Error records</dt><dd>{{ r.errorRecords.toLocaleString() }}</dd></div>
+          <div><dt>New clusters</dt><dd>{{ r.clustersCreated }}</dd></div>
+          <div><dt>Updated clusters</dt><dd>{{ r.clustersUpdated }}</dd></div>
+          <div><dt>Test cases generated</dt><dd>{{ r.testCasesGenerated }}</dd></div>
+          @if (r.testCasesQueued) {
+            <div><dt>Clusters generating tests (AI)</dt><dd>{{ r.testCasesQueued }}</dd></div>
+          }
+        </dl>
+        @if (r.testCasesQueued) {
+          <p class="note">
+            The AI agent is writing test cases in the background (about 10 per cluster). They appear on the
+            Test Cases page as they finish.
+          </p>
+        }
+        @for (w of r.warnings ?? []; track w) {
+          <p class="warn" role="alert"><mat-icon aria-hidden="true">warning</mat-icon>{{ w }}</p>
+        }
+        <a mat-flat-button routerLink="/clusters">View error clusters</a>
+        <a mat-button routerLink="/dashboard">Open dashboard</a>
+      </section>
+    }
+  </mat-card-content>
+</mat-card>

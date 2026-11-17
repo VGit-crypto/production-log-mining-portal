@@ -1,0 +1,15 @@
+@if (rows().length) {
+  <ul class="bars" [attr.aria-label]="label()">
+    @for (r of rows(); track r.label) {
+      <li>
+        <span class="lbl" [title]="r.label">{{ r.label }}</span>
+        <span class="track" aria-hidden="true">
+          <span class="fill" [style.width.%]="r.pct" [style.background]="r.color"></span>
+        </span>
+        <span class="val">{{ r.value }}</span>
+      </li>
+    }
+  </ul>
+} @else {
+  <p class="empty">No data yet.</p>
+}

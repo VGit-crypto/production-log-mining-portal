@@ -1,0 +1,39 @@
+<app-page-header title="Dashboard" subtitle="Overview of errors mined from uploaded production logs">
+  <a mat-flat-button routerLink="/upload"><mat-icon>cloud_upload</mat-icon>Upload logs</a>
+</app-page-header>
+
+<app-error-boundary [loading]="metrics.loading() && !metrics.data()" [error]="metrics.error()" (retry)="metrics.load()">
+  @if (metrics.data(); as m) {
+    @if (m.totalLogs === 0) {
+      <app-empty-state icon="insights" title="No logs processed yet" message="Upload a .json or .ndjson log file to see insights.">
+        <a mat-flat-button routerLink="/upload">Upload logs</a>
+      </app-empty-state>
+    } @else {
+      <section class="card-grid" aria-label="Key metrics">
+        <app-stat-card label="Total Logs Processed" [value]="m.totalLogs.toLocaleString()" icon="description" />
+        <app-stat-card label="Total Errors" [value]="m.totalErrors.toLocaleString()" icon="error" />
+        <app-stat-card label="Unique Error Clusters" [value]="m.uniqueClusters" icon="bubble_chart" />
+        <app-stat-card label="Critical Issues" [value]="m.critical" icon="dangerous" tone="critical" />
+        <app-stat-card label="High Issues" [value]="m.high" icon="warning" tone="high" />
+        <app-stat-card label="Medium Issues" [value]="m.medium" icon="report" tone="medium" />
+      </section>
+
+      <section class="chart-grid" aria-label="Charts">
+        <mat-card appearance="outlined">
+          <mat-card-header><mat-card-title>Errors by Severity</mat-card-title></mat-card-header>
+          <mat-card-content>
+            <app-donut-chart [data]="m.bySeverity" label="Errors by severity" centerLabel="errors" />
+          </mat-card-content>
+        </mat-card>
+        <mat-card appearance="outlined">
+          <mat-card-header><mat-card-title>Errors by Module</mat-card-title></mat-card-header>
+          <mat-card-content><app-bar-chart [data]="m.byModule" label="Errors by module" /></mat-card-content>
+        </mat-card>
+      </section>
+      <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title>Trend Analysis: errors per day</mat-card-title></mat-card-header>
+        <mat-card-content><app-line-chart [data]="m.trend" label="Errors per day" /></mat-card-content>
+      </mat-card>
+    }
+  }
+</app-error-boundary>

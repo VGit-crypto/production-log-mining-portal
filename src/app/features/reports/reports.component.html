@@ -1,0 +1,19 @@
+<app-page-header title="Reports" subtitle="Download analysis results for sharing and offline use" />
+<div class="grid">
+  @for (r of reports; track r.id) {
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar aria-hidden="true">{{ r.icon }}</mat-icon>
+        <mat-card-title>{{ r.title }}</mat-card-title>
+        <mat-card-subtitle>{{ r.format }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>{{ r.description }}</mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button type="button" (click)="download(r.id)" [disabled]="busy() !== null">
+          <mat-icon>{{ busy() === r.id ? 'hourglass_top' : 'download' }}</mat-icon>
+          {{ busy() === r.id ? 'Preparing…' : 'Download' }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+</div>

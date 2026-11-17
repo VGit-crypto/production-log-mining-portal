@@ -1,0 +1,129 @@
+<div class="toolbar">
+  <mat-form-field class="grow">
+    <mat-label>Search occurrences</mat-label>
+    <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+    <input matInput type="search" (input)="onSearch($any($event.target).value)"
+           placeholder="Message, error, correlation id" aria-describedby="occ-count" />
+  </mat-form-field>
+  @if (data(); as d) {
+    <span id="occ-count" class="count" role="status" aria-live="polite">
+      @if (query().q) { {{ d.total | number }} of {{ d.stored | number }} records match }
+      @else { {{ d.stored | number }} records }
+    </span>
+  }
+</div>
+
+@if (data(); as d) {
+  @if (d.stored < expected()) {
+    <p class="note" role="note">
+      Only {{ d.stored | number }} of the {{ expected() | number }} counted occurrences are stored for this cluster
+      (it was saved before every record was kept, or it exceeds the per-cluster limit).
+      Run <code>npm run backfill -- &lt;log file&gt;</code> to attach the rest without changing any count.
+    </p>
+  }
+}
+
+@if (error(); as e) {
+  <div class="error" role="alert">
+    <span>{{ e }}</span>
+    <button mat-stroked-button type="button" (click)="reload()">Try again</button>
+  </div>
+}
+
+<div class="table-wrap">
+  @if (loading()) {
+    <div class="loading" role="status" aria-live="polite">Loading occurrences…</div>
+  }
+  <div class="scroll">
+    <table mat-table multiTemplateDataRows [dataSource]="data()?.items ?? []" matSort matSortDisableClear
+           [matSortActive]="query().sort" [matSortDirection]="query().dir"
+           (matSortChange)="onSort($event)" aria-label="All occurrences of this error cluster">
+
+      <ng-container matColumnDef="toggle">
+        <th mat-header-cell *matHeaderCellDef class="col-toggle"><span class="cdk-visually-hidden">Details</span></th>
+        <td mat-cell *matCellDef="let e" class="col-toggle">
+          <button mat-icon-button type="button" (click)="toggle(e)"
+                  [attr.aria-expanded]="expandedId() === e.id"
+                  [attr.aria-label]="(expandedId() === e.id ? 'Hide' : 'Show') + ' details for ' + (e.timestamp | date: 'medium')">
+            <mat-icon>{{ expandedId() === e.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="timestamp">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Time</th>
+        <td mat-cell *matCellDef="let e" class="col-time">{{ e.timestamp | date: 'MMM d, y, HH:mm:ss.SSS' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="level">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
+        <td mat-cell *matCellDef="let e"><span [class]="'lv ' + levelClass(e.level)">{{ e.level }}</span></td>
+      </ng-container>
+
+      <ng-container matColumnDef="statusCode">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>HTTP status</th>
+        <td mat-cell *matCellDef="let e">
+          @if (e.statusCode) { <span class="status">{{ e.statusCode }}</span> } @else { <span class="none" aria-label="none">·</span> }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="phase">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Phase</th>
+        <td mat-cell *matCellDef="let e">{{ e.phase ?? '·' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="message">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Message</th>
+        <td mat-cell *matCellDef="let e" class="col-msg"><span class="clip" [title]="e.message">{{ e.message }}</span></td>
+      </ng-container>
+
+      <ng-container matColumnDef="error">
+        <th mat-header-cell *matHeaderCellDef>Error</th>
+        <td mat-cell *matCellDef="let e" class="col-err"><span class="clip mono" [title]="firstLine(e)">{{ firstLine(e) || '·' }}</span></td>
+      </ng-container>
+
+      <ng-container matColumnDef="correlationId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Correlation ID</th>
+        <td mat-cell *matCellDef="let e" class="mono col-cid">{{ e.correlationId ?? '·' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="detail">
+        <td mat-cell *matCellDef="let e" [attr.colspan]="columns.length" class="detail">
+          @if (expandedId() === e.id) {
+            <div class="detail-inner">
+              <h3>Message</h3>
+              <p>{{ e.message }}</p>
+              @if (e.error ?? e.stackTrace) {
+                <h3>Error / stack trace</h3>
+                <pre class="mono">{{ e.error ?? e.stackTrace }}</pre>
+              }
+              <h3>Request</h3>
+              <dl>
+                @if (e.method || e.url) { <div><dt>Endpoint</dt><dd class="mono">{{ e.method }} {{ e.url }}</dd></div> }
+                @if (e.context) { <div><dt>Context</dt><dd class="mono">{{ e.context }}</dd></div> }
+                @if (e.service) { <div><dt>Service</dt><dd>{{ e.service }}</dd></div> }
+                @if (e.appName) { <div><dt>Application</dt><dd>{{ e.appName }}</dd></div> }
+                @if (e.environment) { <div><dt>Environment</dt><dd>{{ e.environment }}</dd></div> }
+                @if (e.exceptionType) { <div><dt>Exception type</dt><dd class="mono">{{ e.exceptionType }}</dd></div> }
+              </dl>
+            </div>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns" class="row-main"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['detail']" class="detail-row"
+          [style.display]="expandedId() === row.id ? '' : 'none'"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty" [attr.colspan]="columns.length">
+          {{ loading() ? 'Loading…' : 'No occurrences match your search.' }}
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<mat-paginator [length]="data()?.total ?? 0" [pageIndex]="query().page" [pageSize]="query().pageSize"
+               [pageSizeOptions]="pageSizes" showFirstLastButtons (page)="onPage($event)"
+               aria-label="Select page of occurrences" />

@@ -1,0 +1,21 @@
+<div class="wrap">
+  <svg viewBox="0 0 120 120" role="img" [attr.aria-label]="label() + ': ' + summary()">
+    <circle cx="60" cy="60" r="46" fill="none" stroke="#eef1f6" stroke-width="18" />
+    @for (s of slices(); track s.label) {
+      <circle
+        cx="60" cy="60" r="46" fill="none" stroke-width="18"
+        [attr.stroke]="s.color"
+        [attr.stroke-dasharray]="s.dash"
+        [attr.stroke-dashoffset]="s.offset"
+        transform="rotate(-90 60 60)"
+      />
+    }
+    <text x="60" y="58" text-anchor="middle" class="total">{{ total() }}</text>
+    <text x="60" y="74" text-anchor="middle" class="sub">{{ centerLabel() }}</text>
+  </svg>
+  <ul class="legend">
+    @for (s of slices(); track s.label) {
+      <li><span class="dot" [style.background]="s.color"></span>{{ s.label }}<strong>{{ s.value }}</strong></li>
+    }
+  </ul>
+</div>

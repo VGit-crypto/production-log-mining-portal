@@ -1,0 +1,43 @@
+<ng-template #runs let-parts>
+  @for (r of parts; track $index) {
+    @if (r.code) {
+      <code>{{ r.text }}</code>
+    } @else if (r.bold) {
+      <strong>{{ r.text }}</strong>
+    } @else if (r.italic) {
+      <em>{{ r.text }}</em>
+    } @else {
+      <ng-container>{{ r.text }}</ng-container>
+    }
+  }
+</ng-template>
+
+@for (b of blocks(); track $index) {
+  @switch (b.type) {
+    @case ('heading') {
+      <h4 class="md-h"><ng-container *ngTemplateOutlet="runs; context: { $implicit: b.lines[0] }" /></h4>
+    }
+    @case ('ul') {
+      <ul>
+        @for (item of b.lines; track $index) {
+          <li><ng-container *ngTemplateOutlet="runs; context: { $implicit: item }" /></li>
+        }
+      </ul>
+    }
+    @case ('ol') {
+      <ol>
+        @for (item of b.lines; track $index) {
+          <li><ng-container *ngTemplateOutlet="runs; context: { $implicit: item }" /></li>
+        }
+      </ol>
+    }
+    @default {
+      <p>
+        @for (line of b.lines; track $index) {
+          @if ($index > 0) { <br /> }
+          <ng-container *ngTemplateOutlet="runs; context: { $implicit: line }" />
+        }
+      </p>
+    }
+  }
+}

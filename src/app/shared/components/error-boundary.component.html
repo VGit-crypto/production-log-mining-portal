@@ -1,0 +1,15 @@
+@if (error()) {
+  <div class="state" role="alert">
+    <mat-icon aria-hidden="true">error_outline</mat-icon>
+    <h2>We couldn't load this content</h2>
+    <p>{{ error() }}</p>
+    <button mat-flat-button type="button" (click)="retry.emit()">Try again</button>
+  </div>
+} @else if (loading()) {
+  <div class="state" role="status" aria-live="polite">
+    <mat-spinner diameter="40" />
+    <p>Loading…</p>
+  </div>
+} @else {
+  <ng-content />
+}

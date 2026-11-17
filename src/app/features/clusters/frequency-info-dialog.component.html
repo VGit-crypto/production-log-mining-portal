@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>How this frequency is counted</h2>
+<mat-dialog-content>
+  <p>
+    <strong>{{ data.occurrences | number }}</strong> = the number of <em>error</em> log records
+    (level ERROR/FATAL, or with an <code>error</code> field) that share the same
+    @if (data.groupBasis === 'module+signature') {
+      <strong>module and normalized error message</strong>.
+    } @else {
+      <strong>context and URL</strong>.
+    }
+    Successful and informational log lines are not counted.
+  </p>
+  @if (data.groupKey) {
+    <p class="mono pre key">{{ data.groupKey }}</p>
+  }
+  <p class="muted">
+    Counts add up across uploads, but a record that is already stored is never counted twice and the exact same file
+    is rejected. One request can log more than one error line.
+  </p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close cdkFocusInitial>Close</button>
+</mat-dialog-actions>

@@ -1,13 +1,19 @@
 @if (points().length) {
   <svg viewBox="0 0 640 240" role="img" [attr.aria-label]="label() + ': ' + summary()" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="etihad-area" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#635bff" stop-opacity=".32" />
+        <stop offset="100%" stop-color="#635bff" stop-opacity="0" />
+      </linearGradient>
+    </defs>
     @for (t of yTicks(); track t.y) {
-      <line [attr.x1]="pad" [attr.x2]="640 - 12" [attr.y1]="t.y" [attr.y2]="t.y" stroke="#e3e8ef" />
+      <line [attr.x1]="pad" [attr.x2]="640 - 12" [attr.y1]="t.y" [attr.y2]="t.y" stroke="#e2e8f0" stroke-dasharray="3 4" />
       <text [attr.x]="pad - 8" [attr.y]="t.y + 4" text-anchor="end" class="axis">{{ t.v }}</text>
     }
-    <path [attr.d]="area()" fill="#1a4b8c" fill-opacity=".1" />
-    <polyline [attr.points]="line()" fill="none" stroke="#1a4b8c" stroke-width="2.5" stroke-linejoin="round" />
+    <path [attr.d]="area()" fill="url(#etihad-area)" />
+    <polyline [attr.points]="line()" fill="none" stroke="#635bff" stroke-width="3" stroke-linejoin="round" />
     @for (p of points(); track p.label) {
-      <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4" fill="#1a4b8c"><title>{{ p.label }}: {{ p.value }}</title></circle>
+      <circle [attr.cx]="p.x" [attr.cy]="p.y" r="5" fill="#635bff" stroke="#ffffff" stroke-width="2"><title>{{ p.pretty }}: {{ p.value }}</title></circle>
     }
     @for (x of xTicks(); track x.label) {
       <text [attr.x]="x.x" y="228" text-anchor="middle" class="axis">{{ x.label }}</text>

@@ -5,7 +5,7 @@
 
 <app-error-boundary [loading]="page.loading() && !page.data()" [error]="page.error()" (retry)="page.load()">
   @if (page.data(); as d) {
-    <app-page-header [title]="d.cluster.bugTitle" [subtitle]="d.cluster.id + ' · ' + locationLabel(d.cluster)">
+    <app-page-header [title]="d.cluster.reportBugTitle ?? d.cluster.bugTitle" [subtitle]="d.cluster.id + ' · ' + locationLabel(d.cluster)">
       <button mat-flat-button type="button" (click)="generateBug(d.bugs.length > 0)" [disabled]="busy()">
         <mat-icon>bug_report</mat-icon>{{ d.bugs.length ? 'Regenerate Bug Story' : 'Generate Bug Story' }}
       </button>
@@ -26,18 +26,21 @@
               </button>
             </div><div class="v">{{ d.cluster.occurrences | number }} occurrences</div></mat-card-content></mat-card>
             <mat-card appearance="outlined"><mat-card-content><div class="k">Category</div><div class="v">{{ d.cluster.category }}</div></mat-card-content></mat-card>
-            <mat-card appearance="outlined"><mat-card-content><div class="k">Confidence</div><div class="v">{{ d.cluster.confidenceScore | percent }}</div></mat-card-content></mat-card>
           </section>
 
-          <h2>Error summary</h2>
-          <p>{{ d.cluster.summary }}</p>
-          <p class="mono pre sig">{{ d.cluster.signature }}</p>
-          <p class="muted">First seen {{ d.cluster.firstSeen | date: 'medium' }} · Last seen {{ d.cluster.lastSeen | date: 'medium' }}</p>
+          <div class="two-col">
+            <div class="impact">
+              <h2>Business impact</h2>
+              <mat-card appearance="outlined"><mat-card-content class="pad"><p>{{ d.cluster.businessImpact }}</p></mat-card-content></mat-card>
+            </div>
+            <div>
+              <h2>Timeline</h2>
+              <mat-card appearance="outlined">
+                <mat-card-content class="pad"><app-timeline [items]="timelineFor(d.cluster, d.bugs)" label="Cluster timeline" /></mat-card-content>
+              </mat-card>
+            </div>
+          </div>
 
-          <h2>Business impact</h2>
-          <p>{{ d.cluster.businessImpact }}</p>
-
-          <h2>Related log samples · all {{ d.cluster.occurrences | number }} occurrences</h2>
           <app-cluster-occurrences [clusterId]="d.cluster.id" [expected]="d.cluster.occurrences" />
         </div>
       </mat-tab>
@@ -53,8 +56,11 @@
         <div class="panel">
           @for (b of d.bugs; track b.id) {
             <mat-card appearance="outlined" class="sample">
-              <mat-card-header><mat-card-title>{{ b.title }}</mat-card-title><mat-card-subtitle>{{ b.id }}</mat-card-subtitle></mat-card-header>
-              <mat-card-content><app-severity-chip [severity]="b.severity" /><p>{{ b.description }}</p></mat-card-content>
+              <mat-card-header><mat-card-subtitle>{{ b.id }}</mat-card-subtitle></mat-card-header>
+              <mat-card-content>
+                <app-severity-chip [severity]="b.severity" />
+                <app-markdown-view class="bug-desc" [source]="b.description" />
+              </mat-card-content>
               <mat-card-actions><a mat-button routerLink="/bug-stories">Open in Bug Stories</a>
                 <button mat-button type="button" (click)="downloadMd(b)">Download Markdown</button></mat-card-actions>
             </mat-card>

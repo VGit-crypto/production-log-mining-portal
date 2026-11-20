@@ -1,0 +1,19 @@
+<ol class="tl" [attr.aria-label]="label()">
+  @for (it of items(); track $index; let last = $last) {
+    <li [class]="'item tone-' + it.tone" [style.animation-delay.ms]="$index * 40">
+      <span class="rail" aria-hidden="true">
+        <span class="dot"><mat-icon>{{ it.icon ?? 'circle' }}</mat-icon></span>
+        @if (!last) { <span class="line"></span> }
+      </span>
+      <div class="body">
+        <div class="row">
+          <span class="title">
+            @if (it.link) { <a [routerLink]="it.link">{{ it.title }}</a> } @else { {{ it.title }} }
+          </span>
+          <time [attr.datetime]="it.time">{{ it.time | date: 'd MMM y, HH:mm' }}</time>
+        </div>
+        @if (it.meta) { <p class="meta">{{ it.meta }}</p> }
+      </div>
+    </li>
+  }
+</ol>

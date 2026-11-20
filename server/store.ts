@@ -71,6 +71,12 @@ export class Store {
     return fresh;
   }
 
+  /** Stored records of a cluster (its sample logs for data stored before every record was kept). */
+  recordsOf(clusterId: string): LogEntry[] {
+    const stored = this.state.occurrences[clusterId];
+    return stored?.length ? stored : (this.state.clusters[clusterId]?.samples ?? []);
+  }
+
   occurrenceCount(clusterId: string): number {
     return this.state.occurrences[clusterId]?.length ?? 0;
   }

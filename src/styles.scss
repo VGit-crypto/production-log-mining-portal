@@ -1,25 +1,98 @@
 @use '@angular/material' as mat;
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Enterprise dashboard theme (Rhombus / Linear / Stripe inspired).
+//   Brand:    primary #635BFF · secondary #7C3AED · accent #06B6D4
+//   Status:   success #10B981 · warning #F59E0B · danger #EF4444
+//   Neutrals: #0F172A #1E293B #334155 #64748B #CBD5E1 #E2E8F0 #F1F5F9 #F8FAFC #FFFFFF
+//   Spacing:  8px grid (4px only for hairline adjustments) · Radius: 16px cards, 12px controls, 999px pills
+// Fills use the exact brand colors. Where a brand color is used as *text* on a tint it steps one shade darker so the
+// contrast stays at WCAG AA (e.g. links use #4F46E5, status badges use 700-level text on a 100-level background).
+// ---------------------------------------------------------------------------------------------------------------------
 html {
   color-scheme: light;
   @include mat.theme(
     (
       color: (
         theme-type: light,
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: ('Inter', 'Segoe UI', sans-serif),
+        brand-family: ('Inter', 'Segoe UI', sans-serif),
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
       density: 0,
     )
   );
 }
 
 :root {
-  --app-navy: #0b2a55;
-  --app-primary: #1a4b8c;
-  --app-muted: #4d5b6d;
-  --app-border: #d9e0ea;
+  // Brand + status
+  --c-primary: #635bff;
+  --c-primary-strong: #4f46e5; // text/links on tinted surfaces (AA)
+  --c-primary-soft: #eef0ff;
+  --c-secondary: #7c3aed;
+  --c-accent: #06b6d4;
+  --c-success: #10b981;
+  --c-warning: #f59e0b;
+  --c-danger: #ef4444;
+
+  // Neutrals
+  --n-900: #0f172a;
+  --n-800: #1e293b;
+  --n-700: #334155;
+  --n-500: #64748b;
+  --n-300: #cbd5e1;
+  --n-200: #e2e8f0;
+  --n-100: #f1f5f9;
+  --n-50: #f8fafc;
+  --n-0: #ffffff;
+
+  // Semantic aliases used by the components
+  --app-navy: var(--n-900); // headings
+  --app-primary: var(--c-primary-strong); // links and icons on light surfaces
+  --app-muted: var(--n-500);
+  --app-border: var(--n-200);
+  --app-bg: var(--n-50);
+  --app-surface: var(--n-0);
+  --app-radius: 16px;
+  --app-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  --app-shadow-hover: 0 12px 36px rgba(15, 23, 42, 0.14);
+  --app-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --app-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --app-fast: 150ms;
+  --app-base: 200ms;
+
+  // Material 3 system tokens re-pointed at this palette
+  --mat-sys-primary: #635bff;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #eef0ff;
+  --mat-sys-on-primary-container: #312e81;
+  --mat-sys-secondary: #7c3aed;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #f3e8ff;
+  --mat-sys-on-secondary-container: #4c1d95;
+  --mat-sys-tertiary: #06b6d4;
+  --mat-sys-tertiary-container: #cffafe;
+  --mat-sys-on-tertiary-container: #155e75;
+  --mat-sys-error: #ef4444;
+  --mat-sys-surface: #ffffff;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f8fafc;
+  --mat-sys-surface-container: #f1f5f9;
+  --mat-sys-surface-container-high: #ffffff;
+  --mat-sys-surface-container-highest: #e2e8f0;
+  --mat-sys-surface-variant: #f1f5f9;
+  --mat-sys-on-surface: #0f172a;
+  --mat-sys-on-surface-variant: #64748b;
+  --mat-sys-outline: #cbd5e1;
+  --mat-sys-outline-variant: #e2e8f0;
+  --mat-sys-background: #f8fafc;
+  --mat-sys-on-background: #0f172a;
 }
 
 html,
@@ -29,51 +102,69 @@ body {
 
 body {
   margin: 0;
-  background: #fff;
-  color: #1c2533;
-  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--app-bg);
+  color: var(--n-700);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
 }
 
-// Utility layout classes shared by feature pages
+h1,
+h2,
+h3 {
+  color: var(--n-900);
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: var(--c-primary-strong);
+  transition: color var(--app-fast) var(--app-ease);
+}
+
+// ---------------------------------------------------------------- Layout helpers shared by feature pages
 .card-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  margin-bottom: 24px;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-bottom: 32px;
 }
 
 .chart-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
-  margin-bottom: 16px;
-
-  mat-card-title {
-    font-size: 16px;
-    font-weight: 600;
-    padding-bottom: 8px;
-  }
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  margin-bottom: 24px;
 }
 
 .table-wrap {
   overflow-x: auto;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow);
 }
 
+// Compact enterprise filter panel
 .toolbar-row {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
+  padding: 16px 24px 0;
+  margin-bottom: 16px;
+  background: var(--app-surface);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow);
 
   .grow {
-    flex: 1 1 260px;
+    flex: 1 1 280px;
   }
 }
 
 .mono {
-  font-family: ui-monospace, Consolas, monospace;
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
   font-size: 13px;
 }
 
@@ -82,31 +173,205 @@ body {
   overflow-wrap: anywhere;
 }
 
-// Toasts
+// Section header (20px / 600) and small label (12px / 500) used across pages
+.section-title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  color: var(--n-900);
+}
+
+.label-sm {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--n-500);
+}
+
+// ---------------------------------------------------------------- Cards
+.mat-mdc-card {
+  --mat-card-outlined-container-shape: 16px;
+  --mat-card-outlined-outline-width: 0;
+  --mat-card-outlined-outline-color: transparent;
+  --mat-card-outlined-container-color: #ffffff;
+  --mat-card-title-text-weight: 600;
+  --mat-card-title-text-size: 16px;
+  --mat-card-title-text-line-height: 24px;
+  --mat-card-title-text-color: var(--n-900);
+  --mat-card-subtitle-text-size: 12px;
+  --mat-card-subtitle-text-weight: 500;
+  --mat-card-subtitle-text-color: var(--n-500);
+  border: 0;
+  box-shadow: var(--app-shadow);
+  transition:
+    box-shadow var(--app-base) var(--app-ease),
+    transform var(--app-base) var(--app-ease);
+
+  &:hover {
+    box-shadow: var(--app-shadow-hover);
+    transform: translateY(-2px);
+  }
+}
+
+// ---------------------------------------------------------------- Buttons
+.mat-mdc-unelevated-button:not(:disabled) {
+  --mat-button-filled-container-color: var(--c-primary);
+  --mat-button-filled-label-text-color: #ffffff;
+  --mat-button-filled-container-shape: 12px;
+  --mat-button-filled-container-height: 40px;
+  font-weight: 600;
+  transition:
+    box-shadow var(--app-fast) var(--app-ease),
+    transform var(--app-fast) var(--app-ease),
+    background-color var(--app-fast) var(--app-ease);
+
+  &:hover {
+    --mat-button-filled-container-color: #5148f0;
+    box-shadow: 0 6px 16px rgba(99, 91, 255, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+.mat-mdc-outlined-button {
+  --mat-button-outlined-outline-color: var(--n-300);
+  --mat-button-outlined-label-text-color: var(--n-700);
+  --mat-button-outlined-container-shape: 12px;
+  --mat-button-outlined-container-height: 40px;
+  font-weight: 600;
+  transition:
+    background-color var(--app-fast) var(--app-ease),
+    border-color var(--app-fast) var(--app-ease);
+
+  &:hover {
+    --mat-button-outlined-outline-color: var(--c-primary);
+    background: var(--c-primary-soft);
+  }
+}
+
+.mat-mdc-button:not(:disabled) {
+  --mat-button-text-label-text-color: var(--c-primary-strong);
+  --mat-button-text-container-shape: 10px;
+  font-weight: 600;
+}
+
+// ---------------------------------------------------------------- Tables
+.mat-mdc-table {
+  --mat-table-background-color: transparent;
+  --mat-table-header-container-height: 48px;
+  --mat-table-row-item-container-height: 56px;
+  --mat-table-row-item-outline-color: var(--n-100);
+
+  th.mat-mdc-header-cell {
+    white-space: nowrap;
+    background: var(--n-50);
+    color: var(--n-500);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid var(--n-200);
+  }
+
+  td.mat-mdc-cell {
+    font-size: 14px;
+    color: var(--n-700);
+    transition: background-color var(--app-fast) var(--app-ease);
+  }
+
+  .mat-sort-header-arrow {
+    color: var(--c-primary);
+  }
+
+  tr.mat-mdc-row:hover td {
+    background: var(--n-50);
+  }
+}
+
+// ---------------------------------------------------------------- Tabs, paginator, fields, chips
+.mat-mdc-tab-group {
+  --mat-tab-active-indicator-color: var(--c-primary);
+  --mat-tab-active-indicator-height: 3px;
+  --mat-tab-label-text-weight: 600;
+  --mat-tab-active-label-text-color: var(--c-primary-strong);
+  --mat-tab-active-focus-label-text-color: var(--c-primary-strong);
+  --mat-tab-active-hover-label-text-color: var(--c-primary-strong);
+  --mat-tab-inactive-label-text-color: var(--n-500);
+  --mat-tab-divider-color: var(--n-200);
+}
+
+.mat-mdc-paginator {
+  --mat-paginator-container-background-color: transparent;
+  --mat-paginator-container-text-color: var(--n-500);
+  background: transparent;
+}
+
+.mat-mdc-form-field {
+  --mat-form-field-container-height: 48px;
+  --mat-form-field-container-vertical-padding: 12px;
+  --mat-form-field-container-shape: 12px;
+  --mat-form-field-outlined-container-shape: 12px;
+  --mat-form-field-outlined-outline-color: var(--n-200);
+  --mat-form-field-outlined-hover-outline-color: var(--n-300);
+  --mat-form-field-outlined-focus-outline-color: var(--c-primary);
+  --mat-form-field-outlined-label-text-color: var(--n-500);
+  --mat-form-field-outlined-focus-label-text-color: var(--c-primary-strong);
+  --mat-form-field-outlined-hover-label-text-color: var(--n-700);
+  --mat-form-field-outlined-input-text-color: var(--n-900);
+  background: #ffffff;
+  border-radius: 12px;
+}
+
+// Compact one-row filter panels: let the field infix shrink below Material's 180px default.
+.fields .mat-mdc-form-field-infix {
+  min-width: 0;
+  width: auto;
+}
+
+.mat-mdc-chip {
+  --mat-chip-container-shape-radius: 999px;
+  --mat-chip-elevated-container-color: var(--c-primary-soft);
+  --mat-chip-label-text-color: var(--c-primary-strong);
+  --mat-chip-label-text-size: 12px;
+  --mat-chip-label-text-weight: 500;
+}
+
+// ---------------------------------------------------------------- Toasts
 .toast-success {
-  --mat-snack-bar-container-color: #1b5e20;
+  --mat-snack-bar-container-color: #065f46;
   --mat-snack-bar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #fff;
+  --mat-snack-bar-button-color: #a7f3d0;
 }
 .toast-error {
-  --mat-snack-bar-container-color: #8c1d18;
+  --mat-snack-bar-container-color: #991b1b;
   --mat-snack-bar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #fff;
+  --mat-snack-bar-button-color: #fecaca;
 }
 .toast-warn {
-  --mat-snack-bar-container-color: #6b5000;
+  --mat-snack-bar-container-color: #92400e;
   --mat-snack-bar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #fff;
+  --mat-snack-bar-button-color: #fde68a;
 }
 .toast-info {
-  --mat-snack-bar-container-color: #0b2a55;
+  --mat-snack-bar-container-color: #0f172a;
   --mat-snack-bar-supporting-text-color: #fff;
-  --mat-snack-bar-button-color: #fff;
+  --mat-snack-bar-button-color: #c7d2fe;
+}
+
+// ---------------------------------------------------------------- Motion
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.content > * {
+  animation: page-in 250ms var(--app-ease) both;
 }
 
 // Visible keyboard focus everywhere
 :focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid var(--c-primary);
   outline-offset: 2px;
 }
 

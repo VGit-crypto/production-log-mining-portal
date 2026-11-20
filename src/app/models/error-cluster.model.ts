@@ -33,6 +33,11 @@ export interface ErrorCluster {
   lastSeen: string;
   /** 0..1 confidence of the AI categorisation. */
   confidenceScore: number;
+  /**
+   * `Cluster` title from the agent repo's SkypadLogs-Error-report.json, matched on the cluster's `context`. Set by the server on read; absent when the report has no entry for the cluster.
+   */
+  reportBugTitle?: string;
+  reportBugId?: string;
   summary: string;
   businessImpact: string;
   rootCause: string;

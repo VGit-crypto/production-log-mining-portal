@@ -406,7 +406,9 @@ const FALLBACK: Rule = {
 const titleCase = (s: string) =>
   s.replace(/[-_.]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()).trim() || 'Application';
 
-function ruleFor(c: ClusterDraft): Rule {
+function ruleFor(c: ClusterDraft, category?: string): Rule {
+  // A category decided elsewhere (the server uses the agent repo's knowledge base) wins over the keyword heuristic.
+  if (category) return RULES.find((r) => r.category === category) ?? FALLBACK;
   const haystack = `${c.signature} ${c.samples.map((s) => `${s.stackTrace ?? ''} ${s.error ?? ''}`).join(' ').slice(0, 800)}`;
   return RULES.find((r) => r.match.test(haystack)) ?? FALLBACK;
 }
@@ -419,15 +421,20 @@ function severityFor(c: ClusterDraft, rule: Rule): Severity {
   return order[i];
 }
 
-export function analyzeCluster(c: ClusterDraft): Omit<ErrorCluster, 'relatedBugIds' | 'testCaseIds'> {
-  const rule = ruleFor(c);
+/**
+ * Rule-based analysis of a cluster. `category` (one of the RULES categories, or 'Uncategorized') overrides the built-in
+ * keyword matching; the severity bump, root cause and business impact then follow that category.
+ */
+export function analyzeCluster(c: ClusterDraft, category?: string): Omit<ErrorCluster, 'relatedBugIds' | 'testCaseIds'> {
+  const rule = ruleFor(c, category);
   const mod = titleCase(c.module);
   const confidence =
     (rule === FALLBACK ? 0.5 : 0.68) + (c.hasType ? 0.1 : 0) + (c.hasStack ? 0.1 : 0) + Math.min(0.1, c.occurrences / 500);
   return {
     id: c.id,
     signature: c.signature,
-    category: rule.category,
+    // A supplied category is kept verbatim even when it is not one of the built-in groups (its texts then use the fallback).
+    category: category ?? rule.category,
     module: c.module,
     appName: c.samples[0]?.appName,
     service: c.samples[0]?.service,

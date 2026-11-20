@@ -5,6 +5,8 @@ import { Readable } from 'node:stream';
 import { APIResponse, BugStory, OccurrenceSort } from '../src/app/models';
 import { AGENT_REPO, aiConfigured, HOST, MAX_UPLOAD_BYTES, PORT, WEB_DIST } from './config';
 import { HttpError, Pipeline } from './pipeline';
+import { reportContextTotals } from './report-categories';
+import { withReportTitles } from './report-titles';
 import { Store } from './store';
 
 const store = new Store();
@@ -16,6 +18,15 @@ const send = <T>(res: ServerResponse, status: number, body: APIResponse<T> | obj
 };
 const ok = <T>(res: ServerResponse, data: T, message?: string) =>
   send(res, 200, { success: true, data, message, timestamp: new Date().toISOString() } satisfies APIResponse<T>);
+
+/** Adds each story's cluster title from the report file (display only; never written to the store). */
+function withClusterTitles(bugs: BugStory[]): BugStory[] {
+  const titles = new Map(withReportTitles(store.listClusters()).map((c) => [c.id, c.reportBugTitle]));
+  return bugs.map((b) => {
+    const clusterTitle = titles.get(b.clusterId);
+    return clusterTitle ? { ...b, clusterTitle } : b;
+  });
+}
 
 async function readJson(req: IncomingMessage): Promise<Record<string, unknown>> {
   const chunks: Buffer[] = [];
@@ -58,6 +69,8 @@ async function route(req: IncomingMessage, res: ServerResponse, method: string, 
   const match = (re: RegExp) => (m = re.exec(p));
 
   if (method === 'GET' && p === '/api/health') return ok(res, { status: 'up', aiConfigured: aiConfigured() });
+  // Picks up a regenerated SkypadLogs-Error-report_TC.json without a restart (no-op when it has not changed).
+  if (method === 'GET') pipeline.syncCategories();
   if (method === 'POST' && p === '/api/logs/upload') {
     const file = await readUpload(req);
     // ?mode=backfill attaches occurrence records to existing clusters without changing counts (see README).
@@ -65,8 +78,13 @@ async function route(req: IncomingMessage, res: ServerResponse, method: string, 
     return ok(res, await pipeline.ingest(await file.text(), file.name, mode), mode === 'backfill' ? 'Occurrences attached' : 'Logs processed');
   }
   if (method === 'GET' && p === '/api/pipeline/status') return ok(res, pipeline.status());
-  if (method === 'GET' && p === '/api/dashboard/metrics') return ok(res, store.metrics());
-  if (method === 'GET' && p === '/api/clusters') return ok(res, store.listClusters());
+  if (method === 'GET' && p === '/api/dashboard/metrics') {
+    // The module breakdown comes from the agent report (context + totalErrorOccurrences) when it is available.
+    const metrics = store.metrics();
+    const byContext = reportContextTotals();
+    return ok(res, byContext ? { ...metrics, byModule: byContext } : metrics);
+  }
+  if (method === 'GET' && p === '/api/clusters') return ok(res, withReportTitles(store.listClusters()));
   if (method === 'GET' && match(/^\/api\/clusters\/([\w-]+)\/occurrences$/)) {
     const sorts: OccurrenceSort[] = ['timestamp', 'level', 'statusCode', 'phase', 'message', 'correlationId'];
     const sort = url.searchParams.get('sort') as OccurrenceSort;
@@ -83,7 +101,7 @@ async function route(req: IncomingMessage, res: ServerResponse, method: string, 
   if (method === 'GET' && match(/^\/api\/clusters\/([\w-]+)$/)) {
     const c = store.getCluster(m![1]);
     if (!c) throw new HttpError(404, `Cluster ${m![1]} not found`);
-    return ok(res, c);
+    return ok(res, withReportTitles([c])[0]);
   }
   if (method === 'POST' && match(/^\/api\/clusters\/([\w-]+)\/bug-story$/)) {
     const body = await readJson(req);
@@ -92,7 +110,7 @@ async function route(req: IncomingMessage, res: ServerResponse, method: string, 
   if (method === 'POST' && match(/^\/api\/clusters\/([\w-]+)\/test-cases$/)) {
     return ok(res, await pipeline.regenerateTests(m![1]), 'Test cases generated');
   }
-  if (method === 'GET' && p === '/api/bug-stories') return ok(res, store.listBugs(clusterId));
+  if (method === 'GET' && p === '/api/bug-stories') return ok(res, withClusterTitles(store.listBugs(clusterId)));
   if (method === 'PUT' && match(/^\/api\/bug-stories\/([\w-]+)$/)) {
     const cur = store.getBug(m![1]);
     if (!cur) throw new HttpError(404, `Bug story ${m![1]} not found`);
@@ -110,7 +128,7 @@ async function route(req: IncomingMessage, res: ServerResponse, method: string, 
       updatedAt: new Date().toISOString(),
     };
     store.putBug(next);
-    return ok(res, next, 'Bug story saved');
+    return ok(res, withClusterTitles([next])[0], 'Bug story saved');
   }
   if (method === 'GET' && p === '/api/test-cases') return ok(res, store.listTests(clusterId));
   throw new HttpError(404, `No route for ${method} ${p}`);
@@ -150,5 +168,6 @@ http
   .listen(PORT, HOST, () => {
     console.log(`Log Mining API on http://${HOST}:${PORT}  (agents: ${AGENT_REPO})`);
     console.log(aiConfigured() ? 'AI: configured' : 'AI: NOT configured, set API_URL, API_KEY, MODEL_NAME');
+    pipeline.recategorize();
     pipeline.resumePending();
   });

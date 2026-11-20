@@ -1,7 +1,13 @@
-<mat-card appearance="outlined" class="stat" [class]="'stat tone-' + tone()">
-  <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
-  <div>
-    <div class="value">{{ value() }}</div>
-    <div class="label">{{ label() }}</div>
+<mat-card appearance="outlined" [class]="'kpi tone-' + tone()">
+  <div class="top">
+    <span class="label">{{ label() }}</span>
+    <span class="ico" aria-hidden="true"><mat-icon>{{ icon() }}</mat-icon></span>
+  </div>
+  <div class="value">{{ value() }}</div>
+  <div class="foot">
+    @if (trend(); as t) {
+      <span [class]="'delta ' + t.tone">@if (arrow()) { <mat-icon aria-hidden="true">{{ arrow() }}</mat-icon> }{{ t.label }}</span>
+    }
+    @if (hint()) { <span class="hint">{{ hint() }}</span> }
   </div>
 </mat-card>

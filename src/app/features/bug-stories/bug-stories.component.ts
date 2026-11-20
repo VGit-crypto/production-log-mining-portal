@@ -32,7 +32,10 @@ import { BugStoryDialogComponent, BugStoryDialogData } from './bug-story-dialog.
     .desc { margin: 12px 0 8px; line-height: 1.55; }
     .impact { margin: 0 0 6px; line-height: 1.55; }
     .more { margin: 0; color: var(--app-muted); font-size: 13px; }
-    mat-card-content { padding-top: 12px; }
+    mat-card-header { padding: 24px 24px 0; display: grid; gap: 4px; }
+    mat-card-title { font-size: 16px; line-height: 24px; }
+    mat-card-content { padding: 16px 24px 8px; }
+    mat-card-actions { padding: 8px 16px 16px; gap: 4px; }
   `,
 })
 export class BugStoriesComponent {

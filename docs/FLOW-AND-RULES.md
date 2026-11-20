@@ -30,7 +30,7 @@ Upload production logs (`.json` / `.ndjson`). The portal finds the error records
 | Business-friendly **bug title** per cluster | AI agent (bug-title prompt) |
 | **Regression test cases** per cluster (10 each) | AI agent (test-case generator) |
 | **Bug story** (description + 5 acceptance criteria) | AI agent (bug-story writer) |
-| Category, severity, confidence, RCA, business impact | Deterministic rules |
+| Category (agent repo's _TC report, rule file as fallback), severity, confidence, RCA, business impact | Deterministic rules |
 | Dashboard metrics and charts | Computed from stored clusters |
 
 The AI agents are not part of this repo. They are loaded **at runtime from the sibling repo
@@ -225,20 +225,48 @@ Other clustering facts:
 - **Check it yourself**: `npm run cluster:freq -- <file>` prints the same frequency table for any log file without
   the server or AI.
 
-### 4.6 Category (first matching rule wins)
+### 4.6 Category (from the agent repo's _TC report)
 
-Matched against the signature plus up to 800 characters of sample stack/error text.
+**Primary source.** Each cluster's category is the `category_id` of its entry in the agent repo's
+`test-results/SkypadLogs-Error-report_TC.json` (`errors[]`), matched on the cluster's `context` (the entry with the same
+`url` wins if several share a context). The value is used verbatim. `REPORT_TC_FILE` overrides the path. When the
+file changes, the next API request re-applies it to every stored cluster (no restart, no re-upload).
 
-| Order | Category | Matches (summary) | Severity bump |
-|---|---|---|---|
-| 1 | Database | sql, database, deadlock, jdbc, connection pool, constraint, query, transaction | +1 |
-| 2 | Network & Connectivity | timeout, timed out, econn, connection refused/reset, unreachable, socket, 502/503/504 | none |
-| 3 | Authentication & Authorization | unauthorized, forbidden, 401/403, token, credential, expired, access denied | +1 |
-| 4 | Resource Exhaustion | out of memory, heap, disk, no space, quota, too many open files, thread pool, rate limit | +1 |
-| 5 | Data Handling | null, undefined, cannot read prop, nullpointer, missing, not found, index out of | none |
-| 6 | Validation | valid, malformed, parse, format, schema, illegal argument, 400 | none |
-| 7 | Integration | api, gateway, upstream, downstream, service, payment, http, client | none |
-| 8 | Uncategorized | fallback | none |
+**Fallback for clusters with no entry in that report** (for example a new upload the agent pipeline has not seen
+yet): the API categorizes with the **agent repo's own knowledge base**,
+`packages/dynatrace/kb/logs-failure-categories.json` (`KB_FILE` overrides the path, re-read whenever the file
+changes). It holds ~18 rules with Skypad-specific patterns (AIMS, Amadeus, Datahub, crew/seat-map), each belonging
+to one of the 7 category groups below. `server/categorizer.ts` applies them exactly as
+`packages/dynatrace/src/app-log-analyzer.ts` does:
+
+1. **Per record**, test `message + stackTrace + error` (case-insensitive) against every rule **in file order**; the
+   first rule with a matching regex wins, and the record votes for that rule's `group`.
+2. **Per cluster**, the group with the most votes becomes the category. Ties go to the group that appears first in
+   the rule file. A cluster whose records match no rule at all is `Uncategorized`.
+
+Voting matters because one cluster (same `context` + `url`) can hold records with different causes (for example
+3 "AIMS SOAP Fault" records and 6 "Invalid credentials" records would vote *Authentication & Authorization*).
+
+| Group (file order) | Example rules | Severity bump |
+|---|---|---|
+| Database | schema/query failure, connection pool | +1 |
+| Network & Connectivity | downstream timeout, ECONNREFUSED/ECONNRESET | none |
+| Authentication & Authorization | JWT/401/403, TLS certificate, config & secrets | +1 |
+| Resource Exhaustion | OutOfMemory, ENOSPC, HTTP 429 | +1 |
+| Data Handling | data not found (No guests found, Required data missing), NullPointer/TypeError | none |
+| Validation | invalid flight details, business-rule conflict (already exists), input validation | none |
+| Integration | AIMS SOAP fault, Amadeus error, downstream 4xx, generic 5xx | none |
+| Uncategorized | nothing matched | none |
+
+**Fallback.** When the rule file cannot be read, the portal keeps working with the built-in keyword rules in
+`src/app/core/mock/log-pipeline.ts` (same 7 groups, one regex each, matched against the signature plus up to 800
+characters of sample error text) and logs a warning. Offline mock mode always uses those built-in rules.
+
+**Existing data.** `pipeline.recategorize()` runs at API start-up and whenever the _TC report changes, and
+re-applies both sources to every stored cluster (a change to the rule file alone takes effect on a restart). It only
+rewrites the category-driven
+fields (category, severity, confidence, root cause, business impact). Counts, bug titles, test cases and bug
+stories are untouched.
 
 ### 4.7 Severity
 
@@ -273,10 +301,10 @@ the bug story reuses them.
 |---|---|
 | Total Logs Processed / Total Errors | Running totals across all uploads |
 | Unique Error Clusters | Number of clusters |
-| Critical / High / Medium Issues | **Number of clusters** at that severity |
+| Critical / High / Medium / Low errors (KPI cards, second row) | **Number of clusters** at that severity; the pill shows that severity's share of all error records |
 | Errors by Severity (chart) | **Sum of occurrences** per severity |
-| Errors by Module (chart) | Top 8 modules by occurrences |
-| Trend Analysis (chart) | Errors per day, last 30 days |
+| Errors by Module (chart) | One bar per `context` of the agent repo's `SkypadLogs-Error-report_TC.json`, valued by that entry's `totalErrorOccurrences`, highest first (entries sharing a context are summed); the first 10 are shown and the rest sit behind a **View more** button (Show less collapses it again); each name stays on one line, cut after 36 characters with `...` (the full name is in the hover tooltip). Falls back to the top 8 modules by occurrences when the report is unavailable |
+| Errors per day (computed by the API as `trend`, no longer shown on the dashboard) | Last 30 days |
 
 ---
 
@@ -374,18 +402,18 @@ Status codes used: 200, 400 (bad body/multipart), 404 (unknown cluster/story/rou
 
 | Page (route) | What it shows | Key behavior |
 |---|---|---|
-| **Dashboard** `/dashboard` | 6 metric cards, donut (errors by severity), bar list (errors by module), line chart (trend) | Empty state until logs are uploaded; retry on load failure |
+| **Dashboard** `/dashboard` | 7 KPI cards with trend pills (3 totals, then the 4 severity levels), donut (errors by severity), bar list (errors by module), and a vertical timeline of the six most recently active clusters (newest first, each links to its cluster) | Empty state until logs are uploaded; retry on load failure |
 | **Upload Logs** `/upload` | Drag-and-drop zone, file picker, progress bar, result summary | Phases: validating → uploading (%) → processing → done. Keyboard accessible. Shows warnings and "AI is writing test cases" note |
-| **Error Clusters** `/clusters` | Material table: Cluster Id, Signature, Category, Severity, Occurrences, Last Seen, Confidence | Search (id, signature, module, category), severity and category filters, sort on every column (severity sorts by rank), pagination 10/25/50, row click opens details |
-| **Cluster Details** `/clusters/:id` | Tabs: Overview, RCA, Related Bugs, Generated Tests. The header shows **module › context**: the application (`appName`) and the class.method that logged the error (falls back to the service, then `module`, when a log lacks these fields) | Buttons **Generate/Regenerate Bug Story** and **Generate/Regenerate Test Cases** with a busy banner. Overview shows severity, frequency (ⓘ icon opens "How this frequency is counted"), category, confidence, business impact, summary, and **a table of every occurrence** (below) |
+| **Error Clusters** `/clusters` | Material table: Cluster Id, Error Signature, Category, Severity, Occurrences, Created at (shows the cluster's last-seen time). The **Error Signature** cell shows the `Cluster` value from the agent repo's `test-results/SkypadLogs-Error-report.json` (`errors[]`) when an entry there has the same `context` as the cluster (the entry with the same URL wins if several share a context); clusters with no matching entry keep their normalized signature. The file is re-read whenever it changes (`REPORT_FILE` overrides the path) | Compact filter panel: search (id, bug title, signature, module, category), **multi-select** severity and category, a **date-range picker** on Created at, removable **filter chips** with Clear all and an "N of M clusters" count; sort on every column (severity sorts by rank), pagination 10/25/50, row click opens details |
+| **Cluster Details** `/clusters/:id` | Tabs: Overview, RCA, Related Bugs, Generated Tests. The header shows **module › context**: the application (`appName`) and the class.method that logged the error (falls back to the service, then `module`, when a log lacks these fields) | Buttons **Generate/Regenerate Bug Story** and **Generate/Regenerate Test Cases** with a busy banner. Overview shows severity, frequency (ⓘ icon opens "How this frequency is counted"), category, business impact, a **timeline** (last error, generated bug stories, first error) and **a table of every occurrence** (below) |
 
-**Occurrences table** (Cluster Details → Overview → "Related log samples · all N occurrences"): server-side
-pagination (10/25/50/100), sorting and search. Columns: **Time** (to the millisecond), **Level**, **HTTP status**,
-**Phase** (`service`/`middleware`), **Message**, **Error** (first line), **Correlation ID**. The row's chevron expands
+**Occurrences table** (Cluster Details → Overview, below Business impact): server-side
+pagination (10/25/50/100), sorting and search. Columns, in order: **Correlation ID**, **Message**, **Level**, **Time** (to the millisecond).
+The row's chevron expands
 the full message, the complete error / stack trace and the request details (method + URL, context, service,
 application, environment, exception type). A banner explains when fewer records are stored than the counted
 frequency (older data) and points to the backfill command.
-| **Bug Stories** `/bug-stories` | Card per story: title, severity, a plain-text summary of the description (first paragraph), a short business-impact line and the number of acceptance criteria | **View** opens a formatted dialog: description with section headings (Business context, Failure scenario, Why it likely failed, Customer impact, Technical impact, Relevant identifiers), bullet lists, bold and inline code; RCA with a "Suggested checks" list; business impact; acceptance criteria as AC1–AC5 rows. **Edit** (reactive form with validation, add/remove criteria, Markdown hint), **Download Markdown** |
+| **Bug Stories** `/bug-stories` | Card per story: title (the cluster's `Cluster` text from the report file, as on the cluster pages; the story's own title when the report has no entry), severity, a plain-text summary of the description (first paragraph), a short business-impact line and the number of acceptance criteria | **View** opens a formatted dialog: description with section headings (Business context, Failure scenario, Why it likely failed, Customer impact, Technical impact, Relevant identifiers), bullet lists, bold and inline code; RCA with a "Suggested checks" list; business impact; acceptance criteria as AC1–AC5 rows. **Edit** (reactive form with validation, add/remove criteria, Markdown hint), **Download Markdown** |
 | **Test Cases** `/test-cases` | Table: ID, Scenario, Preconditions, Steps, Expected Results, Priority | Search, sort, paginate; **Export CSV / Excel** honour the current search; progress banner and auto-refresh while the AI is working |
 | **Reports** `/reports` | Four download cards | See section 8 |
 
@@ -427,7 +455,28 @@ injection from untrusted log text.
 - **Accessibility**: skip link, landmarks, `aria-current` on navigation, `aria-live` status regions, visible focus
   ring, keyboard-operable drop zone, `prefers-reduced-motion` respected.
 - **Responsive**: sidenav switches to an overlay under 900px, card grids reflow, tables scroll horizontally.
-- **Theme**: Angular Material 3 (azure palette), dark-blue header, white content area.
+- **Theme (enterprise SaaS dashboard, Rhombus / Linear / Stripe inspired)**: defined once in `src/styles.scss` and
+  applied everywhere through CSS variables (`--c-*` brand/status, `--n-*` neutrals, `--app-*` aliases), so components
+  never hard-code brand colors.
+  - *Colors*: primary `#635BFF`, secondary `#7C3AED`, accent `#06B6D4`, success `#10B981`, warning `#F59E0B`,
+    danger `#EF4444`; neutrals `#0F172A #1E293B #334155 #64748B #CBD5E1 #E2E8F0 #F1F5F9 #F8FAFC #FFFFFF`. Fills use
+    the exact values. Where a brand color is *text* on a tint it steps one shade darker for WCAG AA (links
+    `#4F46E5`; badge text uses 700-level shades such as `#047857` on `#D1FAE5`).
+  - *Severity colors*: Critical `#EF4444`, High `#F59E0B`, Medium `#7C3AED`, Low `#10B981`. Medium is violet, not cyan,
+    because cyan next to green fails the normal-vision distance check in the donut; every use also carries a text label.
+  - *Typography*: Inter, Segoe UI. Page title 28/700, section header 20/600, widget title 16/600, body 14/400,
+    small label 12/500.
+  - *Spacing and surfaces*: 8px grid; cards 16px radius, shadow `0 8px 30px rgba(15,23,42,.08)`, 24px padding, lift
+    2px with a stronger shadow on hover; sidebar `#0F172A` with a `#635BFF` rounded active item; page `#F8FAFC`.
+  - *Motion*: 150-250ms transitions on hover/focus/elevation, page fade-in, bars grow and the donut draws on load
+    (all disabled under `prefers-reduced-motion`).
+  - *Material 3*: the `--mat-sys-*` tokens are re-pointed at this palette; buttons, cards, tables, tabs, chips and
+    form fields (rounded outline, no reserved hint space) get token overrides, not a CSS fork.
+  - *Charts*: one series = one color (primary), values printed beside every mark; the categorical fallback is the
+    validated reference order.
+  - *Components*: `app-stat-card` (KPI with icon tile and optional trend pill), `app-timeline` (vertical operational
+    timeline), pill `app-severity-chip`, `app-page-header`. KPI indicators use real data only: day-over-day change
+    when two or more days of errors exist, otherwise a severity card's share of all errors.
 
 ### Mock mode
 
@@ -489,6 +538,9 @@ in the browser using the rule-based pipeline: rule-based titles, 3 generic test 
 |---|---|---|
 | `API_URL`, `API_KEY`, `MODEL_NAME` | from `server/.env`, then `<AGENT_REPO_PATH>/.env` | AI provider (existing environment variables win) |
 | `AGENT_REPO_PATH` | `../Prod-error-AI-agent` | Where the agents and prompts live |
+| `REPORT_TC_FILE` | `<AGENT_REPO>/test-results/SkypadLogs-Error-report_TC.json` | Source of each cluster's category (`category_id`, section 4.6) |
+| `KB_FILE` | `<AGENT_REPO>/packages/dynatrace/kb/logs-failure-categories.json` | Fallback category rules for clusters not in the _TC report |
+| `REPORT_FILE` | `<AGENT_REPO>/test-results/SkypadLogs-Error-report.json` | Source of the `Cluster` titles shown in the UI |
 | `PORT`, `HOST` | `3000`, `127.0.0.1` | API listen address |
 | `AI_CONCURRENCY` | `2` | Parallel AI calls (titles and test cases) |
 | `AI_RETRIES`, `AI_TIMEOUT_SECONDS` | `3`, `150` | AI resilience |

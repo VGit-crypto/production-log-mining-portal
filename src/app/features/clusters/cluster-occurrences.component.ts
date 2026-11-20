@@ -28,8 +28,8 @@ import { ErrorClusterService } from '../../services/error-cluster.service';
     .toolbar { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; }
     .toolbar .grow { flex: 1 1 280px; }
     .count { color: var(--app-muted); }
-    .note { background: #fff8e1; color: #6b5000; padding: 10px 14px; border-radius: 8px; margin: 0 0 12px; }
-    .error { background: #fdecea; color: #8c1d18; padding: 10px 14px; border-radius: 8px; display: flex; gap: 12px; align-items: center; }
+    .note { background: #fef3c7; color: #92400e; padding: 10px 14px; border-radius: 8px; margin: 0 0 12px; }
+    .error { background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 8px; display: flex; gap: 12px; align-items: center; }
     .table-wrap { position: relative; }
     .scroll { overflow-x: auto; border: 1px solid var(--app-border); border-radius: 8px; }
     .empty { padding: 24px; text-align: center; color: var(--app-muted); }
@@ -38,26 +38,23 @@ import { ErrorClusterService } from '../../services/error-cluster.service';
     .col-toggle { width: 48px; padding: 0 4px !important; }
     .col-time { white-space: nowrap; }
     .col-cid { white-space: nowrap; font-size: 12px; }
-    .col-msg { min-width: 200px; max-width: 300px; }
-    .col-err { min-width: 140px; max-width: 220px; color: var(--app-muted); }
+    .col-msg { min-width: 280px; max-width: 560px; }
     .clip { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
     .lv { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; border: 1px solid currentColor; }
-    .lv-error { color: #8c1d18; background: #fdecea; }
-    .lv-fatal { color: #fff; background: #8c1d18; border-color: #8c1d18; }
-    .lv-warn { color: #6b5000; background: #fff8e1; }
+    .lv-error { color: #b91c1c; background: #fee2e2; }
+    .lv-fatal { color: #fff; background: #b91c1c; border-color: #b91c1c; }
+    .lv-warn { color: #92400e; background: #fef3c7; }
     .lv-other { color: #37474f; background: #eceff1; }
-    .status { font-weight: 600; font-variant-numeric: tabular-nums; }
-    .none { color: #8a97a8; }
     tr.detail-row { height: 0; }
     .detail { overflow: hidden; }
-    .detail-inner { padding: 12px 16px 16px 60px; background: #f7f9fd; border-top: 1px solid var(--app-border); }
+    .detail-inner { padding: 12px 16px 16px 60px; background: #f8fafc; border-top: 1px solid var(--app-border); }
     .detail h3 { margin: 12px 0 4px; font-size: 13px; color: var(--app-muted); font-weight: 600; }
     .detail p { margin: 0; overflow-wrap: anywhere; }
     .detail pre { margin: 0; background: #fff; border: 1px solid var(--app-border); border-radius: 6px; padding: 10px; overflow-x: auto; max-height: 260px; white-space: pre-wrap; overflow-wrap: anywhere; }
     .detail dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px 16px; margin: 0; }
     .detail dt { color: var(--app-muted); font-size: 12px; }
     .detail dd { margin: 0; overflow-wrap: anywhere; }
-    tr.row-main:hover { background: #f1f5fb; }
+    tr.row-main:hover { background: #f8fafc; }
   `,
 })
 export class ClusterOccurrencesComponent {
@@ -68,7 +65,7 @@ export class ClusterOccurrencesComponent {
   private readonly svc = inject(ErrorClusterService);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly columns = ['toggle', 'timestamp', 'level', 'statusCode', 'phase', 'message', 'error', 'correlationId'];
+  protected readonly columns = ['toggle', 'correlationId', 'message', 'level', 'timestamp'];
   protected readonly pageSizes = [10, 25, 50, 100];
 
   protected readonly query = signal<OccurrenceQuery>({ page: 0, pageSize: 25, sort: 'timestamp', dir: 'desc', q: '' });
@@ -119,11 +116,6 @@ export class ClusterOccurrencesComponent {
 
   protected levelClass(level: string): string {
     return level === 'ERROR' ? 'lv-error' : level === 'FATAL' ? 'lv-fatal' : level === 'WARN' ? 'lv-warn' : 'lv-other';
-  }
-
-  /** First line of an error / stack trace, for the compact table cell. */
-  protected firstLine(e: LogEntry): string {
-    return (e.error ?? e.stackTrace ?? '').split(/\r?\n/)[0];
   }
 
   private load(id: string, q: OccurrenceQuery): void {

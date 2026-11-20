@@ -18,7 +18,7 @@ export interface FrequencyInfoData {
   templateUrl: './frequency-info-dialog.component.html',
   styles: `
     p { margin: 8px 0; }
-    .key { background: #f3f6fb; border-radius: 6px; padding: 8px 10px; }
+    .key { background: #f1f5f9; border-radius: 6px; padding: 8px 10px; }
     .muted { color: var(--app-muted); }
   `,
 })

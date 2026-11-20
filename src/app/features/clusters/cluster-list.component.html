@@ -4,37 +4,75 @@
   @if (clusters.data()?.length === 0) {
     <app-empty-state icon="bubble_chart" title="No error clusters" message="Upload logs to create clusters." />
   } @else {
-    <div class="toolbar-row">
-      <mat-form-field class="grow">
-        <mat-label>Search</mat-label>
-        <mat-icon matPrefix aria-hidden="true">search</mat-icon>
-        <input matInput type="search" [value]="search()" (input)="search.set($any($event.target).value)" placeholder="Id, signature, module, category" />
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Severity</mat-label>
-        <mat-select [value]="severity()" (selectionChange)="severity.set($event.value)">
-          <mat-option value="">All</mat-option>
-          @for (s of severities; track s) { <mat-option [value]="s">{{ s }}</mat-option> }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field>
-        <mat-label>Category</mat-label>
-        <mat-select [value]="category()" (selectionChange)="category.set($event.value)">
-          <mat-option value="">All</mat-option>
-          @for (c of categories(); track c) { <mat-option [value]="c">{{ c }}</mat-option> }
-        </mat-select>
-      </mat-form-field>
-    </div>
+    <section class="panel" aria-label="Filters">
+      <div class="fields">
+        <mat-form-field class="grow" subscriptSizing="dynamic">
+          <mat-label>Search</mat-label>
+          <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+          <input matInput type="search" [value]="search()" (input)="search.set($any($event.target).value)" placeholder="Id, bug title, signature, module, category" />
+        </mat-form-field>
+        <mat-form-field class="select" subscriptSizing="dynamic">
+          <mat-label>Severity</mat-label>
+          <mat-select multiple [value]="severity()" (selectionChange)="severity.set($event.value)">
+            @for (s of severities; track s) { <mat-option [value]="s">{{ s }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="select" subscriptSizing="dynamic">
+          <mat-label>Category</mat-label>
+          <mat-select multiple [value]="category()" (selectionChange)="category.set($event.value)">
+            @for (c of categories(); track c) { <mat-option [value]="c">{{ c }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="dates" subscriptSizing="dynamic">
+          <mat-label>Created between</mat-label>
+          <mat-date-range-input [rangePicker]="picker">
+            <input matStartDate placeholder="Start date" aria-label="Start date" [value]="from()" (dateChange)="from.set($event.value)" />
+            <input matEndDate placeholder="End date" aria-label="End date" [value]="to()" (dateChange)="to.set($event.value)" />
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="picker" />
+          <mat-date-range-picker #picker />
+        </mat-form-field>
+      </div>
+
+      @if (activeCount() > 0) {
+        <div class="active">
+          <mat-chip-set aria-label="Active filters">
+            @if (search().trim()) {
+              <mat-chip-row (removed)="search.set('')">Search: {{ search().trim() }}
+                <button matChipRemove type="button" aria-label="Remove search filter"><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            }
+            @for (s of severity(); track s) {
+              <mat-chip-row (removed)="removeSeverity(s)">Severity: {{ s }}
+                <button matChipRemove type="button" [attr.aria-label]="'Remove severity ' + s"><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            }
+            @for (c of category(); track c) {
+              <mat-chip-row (removed)="removeCategory(c)">Category: {{ c }}
+                <button matChipRemove type="button" [attr.aria-label]="'Remove category ' + c"><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            }
+            @if (hasDates()) {
+              <mat-chip-row (removed)="clearDates()">Created: {{ dateChip() }}
+                <button matChipRemove type="button" aria-label="Remove date filter"><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            }
+          </mat-chip-set>
+          <button mat-button type="button" (click)="clearAll()">Clear all</button>
+          <span class="count" role="status" aria-live="polite">{{ resultCount() | number }} of {{ total() | number }} clusters</span>
+        </div>
+      }
+    </section>
 
     <div class="table-wrap">
       <table mat-table [dataSource]="ds" matSort matSortActive="occurrences" matSortDirection="desc" aria-label="Error clusters">
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Cluster Id</th>
-          <td mat-cell *matCellDef="let c"><a class="mono" [routerLink]="[c.id]" (click)="$event.stopPropagation()">{{ c.id }}</a></td>
+          <td mat-cell *matCellDef="let c" class="nowrap"><a class="mono" [routerLink]="[c.id]" (click)="$event.stopPropagation()">{{ c.id }}</a></td>
         </ng-container>
         <ng-container matColumnDef="signature">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Error Signature</th>
-          <td mat-cell *matCellDef="let c" class="sig" [title]="c.signature">{{ c.signature }}</td>
+          <td mat-cell *matCellDef="let c" class="sig" [title]="c.reportBugTitle ?? c.signature">{{ c.reportBugTitle ?? c.signature }}</td>
         </ng-container>
         <ng-container matColumnDef="category">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
@@ -49,12 +87,8 @@
           <td mat-cell *matCellDef="let c">{{ c.occurrences | number }}</td>
         </ng-container>
         <ng-container matColumnDef="lastSeen">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Seen</th>
-          <td mat-cell *matCellDef="let c">{{ c.lastSeen | date: 'medium' }}</td>
-        </ng-container>
-        <ng-container matColumnDef="confidenceScore">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Confidence Score</th>
-          <td mat-cell *matCellDef="let c">{{ c.confidenceScore | percent }}</td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Created at</th>
+          <td mat-cell *matCellDef="let c" class="nowrap">{{ c.lastSeen | date: 'd MMM y, HH:mm' }}</td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>

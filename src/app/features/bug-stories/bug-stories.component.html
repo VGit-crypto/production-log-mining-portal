@@ -10,9 +10,9 @@
     @for (s of stories.data(); track s.id) {
       <mat-card appearance="outlined">
         <mat-card-header>
-          <mat-card-title>{{ s.title }}</mat-card-title>
+          <mat-card-title>{{ s.clusterTitle ?? s.title }}</mat-card-title>
           <mat-card-subtitle>
-            {{ s.id }} · Cluster <a [routerLink]="['/clusters', s.clusterId]">{{ s.clusterId }}</a> · Updated {{ s.updatedAt | date: 'medium' }}
+            {{ s.id }} · Cluster <a [routerLink]="['/clusters', s.clusterId]">{{ s.clusterId }}</a> · Updated {{ s.updatedAt | date: 'd MMM y, HH:mm' }}
           </mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>

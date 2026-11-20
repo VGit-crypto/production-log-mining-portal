@@ -15,7 +15,7 @@ import { parseMarkdown } from '../markdown';
     p { margin: 0 0 10px; }
     ul, ol { margin: 0 0 10px; padding-left: 22px; }
     li { margin: 2px 0; }
-    code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; background: #eef2f8; border-radius: 4px; padding: 1px 5px; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; background: #e2e8f0; border-radius: 4px; padding: 1px 5px; }
     strong code { font-weight: 700; }
   `,
 })

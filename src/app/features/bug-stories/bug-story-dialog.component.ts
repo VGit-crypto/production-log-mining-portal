@@ -25,16 +25,18 @@ export interface BugStoryDialogData {
   ],
   templateUrl: './bug-story-dialog.component.html',
   styles: `
-    h3 { margin: 0 0 6px; font-size: 15px; color: var(--app-navy); }
+    h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: var(--app-navy); }
     p { margin: 0; }
     .meta { display: flex; align-items: center; gap: 12px; color: var(--app-muted); font-size: 13px; margin-bottom: 8px; }
-    .section { padding: 14px 0; border-top: 1px solid var(--app-border); }
+    .section { padding: 16px 0; border-top: 1px solid var(--app-border); }
     .section:first-of-type { border-top: 0; padding-top: 6px; }
     .ac { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
     .ac li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: start; }
-    .ac-id { background: #e8f0fc; color: var(--app-navy); font-weight: 600; font-size: 12px; text-align: center; border-radius: 6px; padding: 3px 0; margin-top: 2px; }
+    .ac-id { background: #eef0ff; color: var(--app-navy); font-weight: 600; font-size: 12px; text-align: center; border-radius: 6px; padding: 3px 0; margin-top: 2px; }
     .ac-text { min-width: 0; }
-    .full { width: 100%; }
+    .full { width: 100%; margin-top: 16px; }
+    .full:first-child { margin-top: 8px; }
+    .crit { margin-top: 8px; }
     .crit { display: flex; gap: 4px; align-items: baseline; }
     .grow { flex: 1; }
   `,

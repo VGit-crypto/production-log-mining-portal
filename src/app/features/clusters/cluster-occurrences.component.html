@@ -44,32 +44,15 @@
         <td mat-cell *matCellDef="let e" class="col-toggle">
           <button mat-icon-button type="button" (click)="toggle(e)"
                   [attr.aria-expanded]="expandedId() === e.id"
-                  [attr.aria-label]="(expandedId() === e.id ? 'Hide' : 'Show') + ' details for ' + (e.timestamp | date: 'medium')">
+                  [attr.aria-label]="(expandedId() === e.id ? 'Hide' : 'Show') + ' details for ' + (e.timestamp | date: 'd MMM y, HH:mm')">
             <mat-icon>{{ expandedId() === e.id ? 'expand_less' : 'expand_more' }}</mat-icon>
           </button>
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="timestamp">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Time</th>
-        <td mat-cell *matCellDef="let e" class="col-time">{{ e.timestamp | date: 'MMM d, y, HH:mm:ss.SSS' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="level">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
-        <td mat-cell *matCellDef="let e"><span [class]="'lv ' + levelClass(e.level)">{{ e.level }}</span></td>
-      </ng-container>
-
-      <ng-container matColumnDef="statusCode">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>HTTP status</th>
-        <td mat-cell *matCellDef="let e">
-          @if (e.statusCode) { <span class="status">{{ e.statusCode }}</span> } @else { <span class="none" aria-label="none">·</span> }
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="phase">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Phase</th>
-        <td mat-cell *matCellDef="let e">{{ e.phase ?? '·' }}</td>
+      <ng-container matColumnDef="correlationId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Correlation ID</th>
+        <td mat-cell *matCellDef="let e" class="mono col-cid">{{ e.correlationId ?? '·' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="message">
@@ -77,14 +60,14 @@
         <td mat-cell *matCellDef="let e" class="col-msg"><span class="clip" [title]="e.message">{{ e.message }}</span></td>
       </ng-container>
 
-      <ng-container matColumnDef="error">
-        <th mat-header-cell *matHeaderCellDef>Error</th>
-        <td mat-cell *matCellDef="let e" class="col-err"><span class="clip mono" [title]="firstLine(e)">{{ firstLine(e) || '·' }}</span></td>
+      <ng-container matColumnDef="level">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Level</th>
+        <td mat-cell *matCellDef="let e"><span [class]="'lv ' + levelClass(e.level)">{{ e.level }}</span></td>
       </ng-container>
 
-      <ng-container matColumnDef="correlationId">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Correlation ID</th>
-        <td mat-cell *matCellDef="let e" class="mono col-cid">{{ e.correlationId ?? '·' }}</td>
+      <ng-container matColumnDef="timestamp">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Time</th>
+        <td mat-cell *matCellDef="let e" class="col-time">{{ e.timestamp | date: 'd MMM y, HH:mm' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="detail">

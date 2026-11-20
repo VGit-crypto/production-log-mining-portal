@@ -11,7 +11,25 @@ dotenv.config({ path: path.join(root, 'server', '.env'), quiet: true });
 export const AGENT_REPO = path.resolve(root, process.env['AGENT_REPO_PATH'] ?? '../Prod-error-AI-agent');
 dotenv.config({ path: path.join(AGENT_REPO, '.env'), quiet: true });
 
-export const PORT = Number(process.env['PORT'] ?? 3000);
+/** Report produced by the agent repo's pipeline; its `Cluster` value (matched by context) is shown in the cluster table. */
+export const REPORT_FILE = path.resolve(
+  AGENT_REPO,
+  process.env['REPORT_FILE'] ?? 'test-results/SkypadLogs-Error-report.json',
+);
+
+/** Report produced by the agent repo's pipeline; its `category_id` (matched by context) is each cluster's category. */
+export const REPORT_TC_FILE = path.resolve(
+  AGENT_REPO,
+  process.env['REPORT_TC_FILE'] ?? 'test-results/SkypadLogs-Error-report_TC.json',
+);
+
+/** The agent repo's failure-category rules; used for clusters that have no entry in the _TC report. */
+export const KB_FILE = path.resolve(
+  AGENT_REPO,
+  process.env['KB_FILE'] ?? 'packages/dynatrace/kb/logs-failure-categories.json',
+);
+
+export const PORT =Number(process.env['PORT'] ?? 3000);
 export const HOST = process.env['HOST'] ?? '127.0.0.1';
 export const MAX_UPLOAD_BYTES = Number(process.env['MAX_UPLOAD_MB'] ?? 50) * 1024 * 1024;
 export const AI_CONCURRENCY = Math.max(1, Number(process.env['AI_CONCURRENCY'] ?? 2));

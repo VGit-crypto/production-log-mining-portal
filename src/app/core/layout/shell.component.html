@@ -1,20 +1,16 @@
 <a class="skip-link" href="#main-content">Skip to main content</a>
-<mat-toolbar class="header" role="banner">
-  @if (isMobile()) {
-    <button mat-icon-button type="button" (click)="nav.toggle()" aria-label="Toggle navigation menu">
-      <mat-icon>menu</mat-icon>
-    </button>
-  }
-  <mat-icon aria-hidden="true" class="logo">troubleshoot</mat-icon>
-  <span class="title">Production Log Mining Portal</span>
-</mat-toolbar>
-<div class="progress" aria-hidden="true">
-  @if (loading.isLoading()) { <mat-progress-bar mode="indeterminate" /> }
-</div>
 
 <mat-sidenav-container class="container">
-  <mat-sidenav #nav [mode]="isMobile() ? 'over' : 'side'" [opened]="!isMobile()" [fixedInViewport]="isMobile()" fixedTopGap="64">
+  <mat-sidenav #nav [mode]="isMobile() ? 'over' : 'side'" [opened]="!isMobile()" [fixedInViewport]="isMobile()" fixedTopGap="0">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"><mat-icon>flight</mat-icon></span>
+      <span class="brand-text">
+        <span class="title">Log Mining Portal</span>
+        <span class="tagline">Airline Technology</span>
+      </span>
+    </div>
     <nav aria-label="Primary">
+      <p class="nav-label">Workspace</p>
       <mat-nav-list>
         @for (item of items; track item.path) {
           <a mat-list-item [routerLink]="item.path" routerLinkActive="active" #rla="routerLinkActive"
@@ -25,8 +21,27 @@
         }
       </mat-nav-list>
     </nav>
+    <footer class="side-foot">Production log analysis and QA automation</footer>
   </mat-sidenav>
+
   <mat-sidenav-content>
+    <header class="topbar" role="banner">
+      @if (isMobile()) {
+        <button mat-icon-button type="button" (click)="nav.toggle()" aria-label="Toggle navigation menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <span class="crumb-root">Production Log Mining Portal</span>
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+        <span class="crumb-current" aria-current="page">{{ currentLabel() }}</span>
+      </nav>
+      <span class="spacer"></span>
+      <a mat-flat-button routerLink="/upload"><mat-icon>cloud_upload</mat-icon>Upload logs</a>
+      <div class="progress" aria-hidden="true">
+        @if (loading.isLoading()) { <mat-progress-bar mode="indeterminate" /> }
+      </div>
+    </header>
     <main id="main-content" tabindex="-1" class="content"><router-outlet /></main>
   </mat-sidenav-content>
 </mat-sidenav-container>

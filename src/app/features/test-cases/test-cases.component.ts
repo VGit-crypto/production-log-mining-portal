@@ -33,14 +33,17 @@ const RANK: Record<Severity, number> = { Critical: 4, High: 3, Medium: 2, Low: 1
   ],
   templateUrl: './test-cases.component.html',
   styles: `
-    .banner { display: flex; gap: 8px; align-items: center; background: #e8f0fc; color: var(--app-navy); padding: 10px 14px; border-radius: 8px; margin: 0 0 16px; }
-    .banner.warn { background: #fff8e1; color: #6b5000; }
-    .search { width: min(100%, 420px); }
+    .banner { display: flex; gap: 8px; align-items: center; background: #eef0ff; color: var(--app-navy); padding: 10px 14px; border-radius: 8px; margin: 0 0 16px; }
+    .banner.warn { background: #fef3c7; color: #92400e; }
+    .search { display: block; width: min(100%, 420px); margin: 0 0 24px; }
     td { vertical-align: top; padding-top: 12px !important; padding-bottom: 12px !important; }
     ul, ol { margin: 0; padding-left: 18px; }
     .nowrap { white-space: nowrap; }
     .wide { min-width: 220px; }
-    td:nth-child(3), td:nth-child(4), td:nth-child(5) { min-width: 240px; }
+    td { line-height: 1.55; font-size: 13.5px; }
+    td:nth-child(3) { min-width: 220px; }
+    td:nth-child(4) { min-width: 380px; }
+    td:nth-child(5) { min-width: 300px; }
     .empty { padding: 24px; text-align: center; color: var(--app-muted); }
   `,
 })

@@ -19,8 +19,8 @@ type Phase = 'idle' | 'validating' | 'uploading' | 'processing' | 'done';
   imports: [RouterLink, MatButtonModule, MatCardModule, MatIconModule, MatProgressBarModule, PageHeaderComponent],
   templateUrl: './upload.component.html',
   styles: `
-    .dropzone { border: 2px dashed #8aa0c0; border-radius: 12px; padding: 48px 16px; text-align: center; cursor: pointer; background: #f7f9fd; transition: background .15s, border-color .15s; }
-    .dropzone:hover, .dropzone.drag { background: #e8f0fc; border-color: var(--app-primary); }
+    .dropzone { border: 2px dashed #c7c4ff; border-radius: 12px; padding: 48px 16px; text-align: center; cursor: pointer; background: #f8fafc; transition: background .15s, border-color .15s; }
+    .dropzone:hover, .dropzone.drag { background: #eef0ff; border-color: var(--app-primary); }
     .dropzone.busy { opacity: .6; cursor: progress; }
     .dropzone mat-icon { width: 56px; height: 56px; font-size: 56px; color: var(--app-primary); }
     .main { font-size: 18px; margin: 8px 0 4px; }
@@ -30,12 +30,12 @@ type Phase = 'idle' | 'validating' | 'uploading' | 'processing' | 'done';
     .row { display: flex; align-items: center; gap: 8px; }
     .name { overflow-wrap: anywhere; }
     .phase { margin-left: auto; color: var(--app-muted); }
-    .error { margin-top: 16px; display: flex; gap: 8px; align-items: flex-start; color: #8c1d18; background: #fdecea; padding: 12px 16px; border-radius: 8px; }
+    .error { margin-top: 16px; display: flex; gap: 8px; align-items: flex-start; color: #b91c1c; background: #fee2e2; padding: 12px 16px; border-radius: 8px; }
     .result { margin-top: 24px; }
     .result h2 { margin: 0 0 12px; font-size: 18px; color: var(--app-navy); }
     dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0 0 16px; }
     .note { color: var(--app-muted); margin: 0 0 12px; }
-    .warn { display: flex; gap: 8px; align-items: flex-start; color: #6b5000; background: #fff8e1; padding: 10px 14px; border-radius: 8px; margin: 0 0 12px; }
+    .warn { display: flex; gap: 8px; align-items: flex-start; color: #92400e; background: #fef3c7; padding: 10px 14px; border-radius: 8px; margin: 0 0 12px; }
     dt { color: var(--app-muted); font-size: 13px; }
     dd { margin: 0; font-size: 24px; font-weight: 700; color: var(--app-navy); }
   `,

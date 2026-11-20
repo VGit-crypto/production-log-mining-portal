@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +9,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize, forkJoin } from 'rxjs';
-import { ErrorCluster } from '../../models';
+import { BugStory, ErrorCluster } from '../../models';
 import { MarkdownViewComponent } from '../../shared/components/markdown-view.component';
 import { ClusterOccurrencesComponent } from './cluster-occurrences.component';
 import { FrequencyInfoData, FrequencyInfoDialogComponent } from './frequency-info-dialog.component';
@@ -25,16 +25,18 @@ import {
   ErrorBoundaryComponent,
   PageHeaderComponent,
   SeverityChipComponent,
+  TimelineComponent,
+  TimelineItem,
 } from '../../shared/components/components';
 
 @Component({
   selector: 'app-cluster-details',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    DatePipe, DecimalPipe, PercentPipe, RouterLink,
+    DecimalPipe, RouterLink,
     MatButtonModule, MatCardModule, MatIconModule, MatTabsModule, MatTableModule, MatTooltipModule,
     PageHeaderComponent, SeverityChipComponent, ErrorBoundaryComponent, EmptyStateComponent,
-    ClusterOccurrencesComponent, MarkdownViewComponent,
+    ClusterOccurrencesComponent, MarkdownViewComponent, TimelineComponent,
   ],
   templateUrl: './cluster-details.component.html',
   styles: `
@@ -43,17 +45,23 @@ import {
     .info { --mat-icon-button-state-layer-size: 28px; width: 28px; height: 28px; padding: 2px; color: var(--app-primary); }
     .info mat-icon { font-size: 18px; width: 18px; height: 18px; }
     .back { margin-bottom: 8px; }
-    .busy { background: #e8f0fc; color: var(--app-navy); padding: 10px 14px; border-radius: 8px; margin: 0 0 12px; }
+    .busy { background: var(--c-primary-soft); color: var(--c-primary-strong); font-weight: 500; padding: 12px 16px; border-radius: 12px; margin: 0 0 16px; }
     .panel { padding: 24px 0; }
-    h2 { font-size: 18px; color: var(--app-navy); margin: 24px 0 8px; }
+    h2 { font-size: 20px; line-height: 28px; font-weight: 600; color: var(--n-900); margin: 32px 0 16px; }
     .facts { margin-bottom: 8px; }
-    .k { color: var(--app-muted); font-size: 13px; margin-bottom: 6px; }
-    .v { font-size: 18px; font-weight: 600; color: var(--app-navy); }
+    .facts mat-card-content { padding: 24px; }
+    .k { color: var(--n-500); font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+    .v { font-size: 24px; line-height: 32px; font-weight: 700; color: var(--n-900); }
+    .two-col { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); align-items: start; }
+    .two-col h2 { margin-top: 0; }
+    .impact p { margin: 0; line-height: 1.6; color: var(--n-700); }
+    mat-card-content.pad { padding: 24px; }
     .muted { color: var(--app-muted); }
-    .sig { background: #f3f6fb; border-radius: 6px; padding: 10px 12px; }
+    .sig { background: var(--n-100); border-radius: 8px; padding: 8px 16px; }
     .sample { margin-bottom: 12px; }
+    .bug-desc { display: block; margin-top: 12px; }
     .meta { color: var(--app-muted); font-size: 13px; margin-bottom: 6px; }
-    .stack { background: #f3f6fb; padding: 10px; border-radius: 6px; overflow-x: auto; margin: 8px 0 0; max-height: 220px; }
+    .stack { background: var(--n-100); padding: 16px; border-radius: 12px; overflow-x: auto; margin: 8px 0 0; max-height: 220px; }
   `,
 })
 export class ClusterDetailsComponent {
@@ -68,6 +76,29 @@ export class ClusterDetailsComponent {
   private readonly dialog = inject(MatDialog);
 
   protected readonly tab = signal(0);
+
+  /** Operational timeline of a cluster, newest first: last error, generated bug stories, first error. */
+  protected timelineFor(c: ErrorCluster, bugs: BugStory[]): TimelineItem[] {
+    const place = c.context ?? c.service ?? c.module;
+    const items: TimelineItem[] = [
+      {
+        title: 'Last error recorded',
+        time: c.lastSeen,
+        meta: `${c.occurrences.toLocaleString()} occurrence${c.occurrences === 1 ? '' : 's'} in total · ${place}`,
+        tone: c.severity.toLowerCase() as TimelineItem['tone'],
+        icon: 'flight_land',
+      },
+      ...bugs.map<TimelineItem>((b) => ({
+        title: 'Bug story generated',
+        time: b.createdAt,
+        meta: b.id,
+        tone: 'success',
+        icon: 'bug_report',
+      })),
+      { title: 'First error recorded', time: c.firstSeen, meta: place, tone: 'info', icon: 'flight_takeoff' },
+    ];
+    return items.sort((a, b) => b.time.localeCompare(a.time));
+  }
   protected readonly busy = signal(false);
   protected readonly testColumns = ['id', 'scenario', 'priority'];
 

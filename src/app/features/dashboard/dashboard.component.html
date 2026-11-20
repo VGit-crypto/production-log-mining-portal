@@ -1,6 +1,4 @@
-<app-page-header title="Dashboard" subtitle="Overview of errors mined from uploaded production logs">
-  <a mat-flat-button routerLink="/upload"><mat-icon>cloud_upload</mat-icon>Upload logs</a>
-</app-page-header>
+<app-page-header title="Dashboard" subtitle="Overview of errors mined from uploaded production logs" />
 
 <app-error-boundary [loading]="metrics.loading() && !metrics.data()" [error]="metrics.error()" (retry)="metrics.load()">
   @if (metrics.data(); as m) {
@@ -9,30 +7,60 @@
         <a mat-flat-button routerLink="/upload">Upload logs</a>
       </app-empty-state>
     } @else {
-      <section class="card-grid" aria-label="Key metrics">
-        <app-stat-card label="Total Logs Processed" [value]="m.totalLogs.toLocaleString()" icon="description" />
-        <app-stat-card label="Total Errors" [value]="m.totalErrors.toLocaleString()" icon="error" />
-        <app-stat-card label="Unique Error Clusters" [value]="m.uniqueClusters" icon="bubble_chart" />
-        <app-stat-card label="Critical Issues" [value]="m.critical" icon="dangerous" tone="critical" />
-        <app-stat-card label="High Issues" [value]="m.high" icon="warning" tone="high" />
-        <app-stat-card label="Medium Issues" [value]="m.medium" icon="report" tone="medium" />
+      <h2 class="section-title">Key metrics</h2>
+      <section class="card-grid totals" aria-label="Totals">
+        <app-stat-card label="Total logs processed" [value]="m.totalLogs.toLocaleString()" icon="description" tone="default"
+                       hint="All records in uploaded files" />
+        <app-stat-card label="Total errors" [value]="m.totalErrors.toLocaleString()" icon="error_outline" tone="high"
+                       [trend]="kpi().errors" [hint]="kpi().errorsHint" />
+        <app-stat-card label="Unique error clusters" [value]="m.uniqueClusters" icon="bubble_chart" tone="info"
+                       [hint]="kpi().clustersHint" />
+      </section>
+      <section class="card-grid severities" aria-label="Errors by severity level">
+        <app-stat-card label="Critical errors" [value]="m.critical" icon="dangerous" tone="critical"
+                       [trend]="kpi().critical" hint="of all errors" />
+        <app-stat-card label="High errors" [value]="m.high" icon="warning_amber" tone="high"
+                       [trend]="kpi().high" hint="of all errors" />
+        <app-stat-card label="Medium errors" [value]="m.medium" icon="info_outline" tone="medium"
+                       [trend]="kpi().medium" hint="of all errors" />
+        <app-stat-card label="Low errors" [value]="m.low" icon="check_circle_outline" tone="success"
+                       [trend]="kpi().low" hint="of all errors" />
       </section>
 
+      <h2 class="section-title">Error distribution</h2>
       <section class="chart-grid" aria-label="Charts">
         <mat-card appearance="outlined">
-          <mat-card-header><mat-card-title>Errors by Severity</mat-card-title></mat-card-header>
+          <mat-card-header>
+            <mat-card-title>Errors by severity</mat-card-title>
+            <mat-card-subtitle>Share of all error records, by cluster severity</mat-card-subtitle>
+          </mat-card-header>
           <mat-card-content>
             <app-donut-chart [data]="m.bySeverity" label="Errors by severity" centerLabel="errors" />
           </mat-card-content>
         </mat-card>
         <mat-card appearance="outlined">
-          <mat-card-header><mat-card-title>Errors by Module</mat-card-title></mat-card-header>
-          <mat-card-content><app-bar-chart [data]="m.byModule" label="Errors by module" /></mat-card-content>
+          <mat-card-header>
+            <mat-card-title>Errors by module</mat-card-title>
+            <mat-card-subtitle>Total error occurrences per logging context</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content><app-bar-chart [data]="m.byModule" [limit]="10" [maxChars]="36" label="Errors by module" /></mat-card-content>
         </mat-card>
       </section>
+
+      <h2 class="section-title">Recent error activity</h2>
       <mat-card appearance="outlined">
-        <mat-card-header><mat-card-title>Trend Analysis: errors per day</mat-card-title></mat-card-header>
-        <mat-card-content><app-line-chart [data]="m.trend" label="Errors per day" /></mat-card-content>
+        <mat-card-header>
+          <mat-card-title>Latest events by cluster</mat-card-title>
+          <mat-card-subtitle>Clusters ordered by the time of their most recent error</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if (activity().length) {
+            <app-timeline [items]="activity()" label="Recent error activity" />
+          } @else {
+            <p class="muted">No cluster activity yet.</p>
+          }
+          <a mat-button routerLink="/clusters" class="all">View all clusters<mat-icon iconPositionEnd>arrow_forward</mat-icon></a>
+        </mat-card-content>
       </mat-card>
     }
   }

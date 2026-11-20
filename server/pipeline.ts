@@ -2,7 +2,9 @@ import { createHash } from 'node:crypto';
 import { BugStory, ErrorCluster, LogEntry, PipelineStatus, TestCase, UploadResult } from '../src/app/models';
 import { analyzeCluster, clusterErrors, isErrorRecord, mergeDraft, parseLogContent } from '../src/app/core/mock/log-pipeline';
 import { AiUnavailableError, generateBugStory, generateBugTitle, generateTestCases } from './agents';
-import { AI_CONCURRENCY, aiConfigured } from './config';
+import { categorizeRecords } from './categorizer';
+import { AI_CONCURRENCY, aiConfigured, KB_FILE, REPORT_TC_FILE } from './config';
+import { reportCategoriesVersion, reportCategoryFor } from './report-categories';
 import { Store } from './store';
 
 const asCluster = (c: Omit<ErrorCluster, 'relatedBugIds' | 'testCaseIds'>): ErrorCluster => ({
@@ -44,6 +46,7 @@ export class Pipeline {
   private readonly queue: string[] = [];
   private active = 0;
   private readonly failed = new Map<string, string>();
+  private categoriesVersion = -1;
 
   constructor(private readonly store: Store) {}
 
@@ -54,6 +57,69 @@ export class Pipeline {
       failedClusters: this.failed.size,
       lastError: last ? oneLine(last).slice(0, 220) : undefined,
     };
+  }
+
+  /**
+   * Category of a cluster: the `category_id` of its entry in the agent repo's SkypadLogs-Error-report_TC.json
+   * (matched on context, then url). Clusters with no entry there fall back to the agent repo's rule file
+   * (logs-failure-categories.json) applied to all of their records.
+   */
+  private categoryFor(first: LogEntry | undefined, records: () => LogEntry[]): string | undefined {
+    return reportCategoryFor(first?.context, first?.url) ?? categorizeRecords(records());
+  }
+
+  /** Re-applies categories when the _TC report changed since the last run (cheap; called on reads). */
+  syncCategories(): void {
+    const version = reportCategoriesVersion();
+    if (version === this.categoriesVersion) return;
+    this.categoriesVersion = version;
+    this.recategorize();
+  }
+
+  /**
+   * Re-applies categories to clusters that are already stored (at start-up and whenever the _TC report changes).
+   * Only category-driven fields change: category, severity, root cause and business impact. Counts, titles,
+   * test cases and bug stories are left alone. Safe to run any number of times.
+   */
+  recategorize(): void {
+    this.categoriesVersion = reportCategoriesVersion();
+    let changed = 0;
+    this.store.batch(() => {
+      for (const prev of this.store.listClusters()) {
+        const category = this.categoryFor(prev.samples[0], () => this.store.recordsOf(prev.id));
+        if (!category || category === prev.category) continue;
+        const a = analyzeCluster(
+          {
+            id: prev.id,
+            groupBasis: prev.groupBasis ?? 'module+signature',
+            groupKey: prev.groupKey ?? '',
+            signature: prev.signature,
+            module: prev.module,
+            occurrences: prev.occurrences,
+            fatalCount: prev.fatalCount,
+            firstSeen: prev.firstSeen,
+            lastSeen: prev.lastSeen,
+            samples: prev.samples,
+            records: [],
+            hasStack: true,
+            hasType: true,
+          },
+          category,
+        );
+        const { relatedBugIds: _a, testCaseIds: _b, ...stored } = prev;
+        this.store.putCluster({
+          ...stored,
+          category: a.category,
+          severity: a.severity,
+          confidenceScore: a.confidenceScore,
+          businessImpact: a.businessImpact,
+          rootCause: a.rootCause,
+        });
+        console.log(`[category] ${prev.id}: ${prev.category} -> ${a.category} (severity ${prev.severity} -> ${a.severity})`);
+        changed++;
+      }
+    });
+    if (changed) console.log(`[category] re-categorized ${changed} stored cluster(s) (source: ${REPORT_TC_FILE}, fallback ${KB_FILE})`);
   }
 
   /** Picks up clusters that never got test cases (e.g. the server restarted mid-generation). */
@@ -111,7 +177,8 @@ export class Pipeline {
       draft.fatalCount = fresh.filter((r) => r.level === 'FATAL').length;
       if (prev) mergeDraft(draft, prev);
       else isNew.add(draft.id);
-      const a = asCluster(analyzeCluster(draft));
+      const category = this.categoryFor(draft.samples[0], () => [...(prev ? this.store.recordsOf(draft.id) : []), ...fresh]);
+      const a = asCluster(analyzeCluster(draft, category));
       if (prev) a.bugTitle = prev.bugTitle; // keep the title the AI already wrote for this cluster
       analyzed.push(a);
     }

@@ -1,8 +1,8 @@
 @if (rows().length) {
   <ul class="bars" [attr.aria-label]="label()">
-    @for (r of rows(); track r.label) {
+    @for (r of visibleRows(); track r.label) {
       <li>
-        <span class="lbl" [title]="r.label">{{ r.label }}</span>
+        <span class="lbl" [title]="r.label">{{ r.shown }}</span>
         <span class="track" aria-hidden="true">
           <span class="fill" [style.width.%]="r.pct" [style.background]="r.color"></span>
         </span>
@@ -10,6 +10,12 @@
       </li>
     }
   </ul>
+  @if (collapsible()) {
+    <button mat-button type="button" class="more" [attr.aria-expanded]="expanded()" (click)="expanded.set(!expanded())">
+      {{ expanded() ? 'Show less' : 'View more (' + hiddenCount() + ' more)' }}
+      <mat-icon iconPositionEnd>{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+    </button>
+  }
 } @else {
   <p class="empty">No data yet.</p>
 }

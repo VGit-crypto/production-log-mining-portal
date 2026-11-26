@@ -1,3 +1,4 @@
+import { FileScopeService } from '../../services/file-scope.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -54,6 +55,7 @@ export class UploadComponent {
   protected readonly fileName = signal('');
   protected readonly error = signal<string | null>(null);
   protected readonly result = signal<UploadResult | null>(null);
+  private readonly scope = inject(FileScopeService);
 
   protected busy(): boolean {
     return ['validating', 'uploading', 'processing'].includes(this.phase());
@@ -115,6 +117,8 @@ export class UploadComponent {
             this.percent.set(100);
             this.result.set(ev.result);
             this.phase.set('done');
+            this.scope.selectAll(); // show the new file in every page
+            this.scope.refresh();
             this.notify.success(`${file.name} processed: ${ev.result.clustersCreated + ev.result.clustersUpdated} cluster(s) found.`);
           }
         },

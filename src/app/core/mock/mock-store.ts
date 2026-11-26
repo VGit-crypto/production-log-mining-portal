@@ -153,6 +153,12 @@ export class MockStore {
     };
   }
 
+  /** Clears everything (the mock equivalent of DELETE /api/data). */
+  clear(): void {
+    this.state = empty();
+    this.save();
+  }
+
   private load(): State {
     try {
       const raw = localStorage.getItem(KEY);

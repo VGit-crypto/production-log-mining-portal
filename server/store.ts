@@ -1,8 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { BugStory, DashboardMetrics, ErrorCluster, LogEntry, OccurrencePage, OccurrenceQuery, TestCase } from '../src/app/models';
+import { BugStory, ErrorCluster, LogEntry, OccurrencePage, OccurrenceQuery, TestCase } from '../src/app/models';
 import {
-  buildMetrics,
   entryKey,
   locationInfo,
   MAX_OCCURRENCES_PER_CLUSTER,
@@ -11,6 +10,15 @@ import {
 import { DATA_FILE } from './config';
 
 type StoredCluster = Omit<ErrorCluster, 'relatedBugIds' | 'testCaseIds'>;
+/** An error record as stored: `fileId` is the SHA-256 of the uploaded file it came from. */
+export type StoredRecord = LogEntry & { fileId?: string };
+/** Per-file metadata. Totals are the file's own log and error counts (absent for files uploaded before tracking). */
+export interface StoredFile {
+  fileName: string;
+  at: string;
+  totalLogs?: number;
+  totalErrors?: number;
+}
 
 interface State {
   totalLogs: number;
@@ -20,9 +28,9 @@ interface State {
   bugs: Record<string, BugStory>;
   tests: Record<string, TestCase>;
   /** Every error log record per cluster (the individual occurrences behind the frequency). */
-  occurrences: Record<string, LogEntry[]>;
+  occurrences: Record<string, StoredRecord[]>;
   /** SHA-256 of every uploaded file, so the exact same file is not processed twice. */
-  files: Record<string, { fileName: string; at: string }>;
+  files: Record<string, StoredFile>;
 }
 
 const empty = (): State => ({
@@ -45,12 +53,28 @@ export class Store {
     }
   }
 
+  /**
+   * Clears every upload, cluster, bug story, test case and file hash. The current store file is first copied to
+   * store.backup-<timestamp>.json next to it, so the data can be recovered by hand.
+   */
+  reset(): { backupFile?: string } {
+    let backupFile: string | undefined;
+    if (fs.existsSync(DATA_FILE)) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      backupFile = DATA_FILE.replace(/\.json$/, `.backup-${stamp}.json`);
+      fs.copyFileSync(DATA_FILE, backupFile);
+    }
+    this.state = empty();
+    this.save();
+    return { backupFile };
+  }
+
   hasFile(hash: string): boolean {
     return !!this.state.files[hash];
   }
 
-  markFile(hash: string, fileName: string): void {
-    this.state.files[hash] = { fileName, at: new Date().toISOString() };
+  markFile(hash: string, fileName: string, totals?: { totalLogs: number; totalErrors: number }): void {
+    this.state.files[hash] = { fileName, at: new Date().toISOString(), ...totals };
     this.save();
   }
 
@@ -61,11 +85,13 @@ export class Store {
   }
 
   /** Stores the not-yet-stored records (up to the per-cluster cap) and returns them. */
-  addOccurrences(clusterId: string, incoming: LogEntry[]): LogEntry[] {
+  addOccurrences(clusterId: string, incoming: LogEntry[], fileId?: string): LogEntry[] {
     const existing = this.state.occurrences[clusterId] ?? [];
     const fresh = this.freshRecords(clusterId, incoming);
     const room = Math.max(0, MAX_OCCURRENCES_PER_CLUSTER - existing.length);
-    const stored = fresh.slice(0, room).map((r, i) => ({ ...r, id: `${entryKey(r)}-${existing.length + i}` }));
+    const stored: StoredRecord[] = fresh
+      .slice(0, room)
+      .map((r, i) => ({ ...r, id: `${entryKey(r)}-${existing.length + i}`, fileId }));
     this.state.occurrences[clusterId] = existing.concat(stored);
     this.save();
     return fresh;
@@ -141,8 +167,49 @@ export class Store {
     this.save();
   }
 
-  metrics(): DashboardMetrics {
-    return buildMetrics(Object.values(this.state.clusters), this.state);
+  /** Every uploaded file, newest first. */
+  listFiles(): Array<StoredFile & { id: string }> {
+    return Object.entries(this.state.files)
+      .map(([id, f]) => ({ id, ...f }))
+      .sort((a, b) => b.at.localeCompare(a.at));
+  }
+
+  /** Stored clusters without the derived bug/test lists (used by the file view). */
+  rawClusterList(): StoredCluster[] {
+    return Object.values(this.state.clusters);
+  }
+
+  /** Every stored error record, keyed by cluster id. */
+  rawOccurrences(): Record<string, StoredRecord[]> {
+    return this.state.occurrences;
+  }
+
+  /**
+   * Deletes the given files: their error records, their file entries, and any cluster that no longer has a record
+   * (with its bug stories and test cases). Returns how many clusters disappeared.
+   */
+  removeFiles(ids: string[]): { clustersRemoved: number; recordsRemoved: number } {
+    const drop = new Set(ids);
+    let recordsRemoved = 0;
+    let clustersRemoved = 0;
+    for (const [clusterId, records] of Object.entries(this.state.occurrences)) {
+      const kept = records.filter((r) => !(r.fileId && drop.has(r.fileId)));
+      recordsRemoved += records.length - kept.length;
+      if (kept.length) {
+        this.state.occurrences[clusterId] = kept;
+        continue;
+      }
+      delete this.state.occurrences[clusterId];
+      if (this.state.clusters[clusterId]) {
+        delete this.state.clusters[clusterId];
+        clustersRemoved++;
+      }
+      for (const b of Object.values(this.state.bugs)) if (b.clusterId === clusterId) delete this.state.bugs[b.id];
+      for (const t of Object.values(this.state.tests)) if (t.clusterId === clusterId) delete this.state.tests[t.id];
+    }
+    for (const id of ids) delete this.state.files[id];
+    this.save();
+    return { clustersRemoved, recordsRemoved };
   }
 
   private hydrate(c: StoredCluster): ErrorCluster {

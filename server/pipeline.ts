@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { BugStory, ErrorCluster, LogEntry, PipelineStatus, TestCase, UploadResult } from '../src/app/models';
 import { analyzeCluster, clusterErrors, isErrorRecord, mergeDraft, parseLogContent } from '../src/app/core/mock/log-pipeline';
+import { clusterView } from './view';
 import { AiUnavailableError, generateBugStory, generateBugTitle, generateTestCases } from './agents';
 import { categorizeRecords } from './categorizer';
 import { AI_CONCURRENCY, aiConfigured, KB_FILE, REPORT_TC_FILE } from './config';
@@ -122,6 +123,25 @@ export class Pipeline {
     if (changed) console.log(`[category] re-categorized ${changed} stored cluster(s) (source: ${REPORT_TC_FILE}, fallback ${KB_FILE})`);
   }
 
+  /**
+   * Re-derives the stored cluster numbers from every file (the "all files" view). Called after files are deleted so
+   * the stored copy never disagrees with what the dashboard shows.
+   */
+  resync(): void {
+    this.store.batch(() => {
+      for (const v of clusterView(this.store, null)) {
+        const { relatedBugIds: _a, testCaseIds: _b, ...stored } = v;
+        this.store.putCluster(stored);
+      }
+    });
+  }
+
+  /** Forgets queued and failed test-case jobs (used when all data is cleared). */
+  reset(): void {
+    this.queue.length = 0;
+    this.failed.clear();
+  }
+
   /** Picks up clusters that never got test cases (e.g. the server restarted mid-generation). */
   resumePending(): void {
     if (!aiConfigured()) return;
@@ -157,7 +177,7 @@ export class Pipeline {
       testCasesQueued: 0,
     };
 
-    if (mode === 'backfill') return { ...base, ...this.backfill(drafts, hash, fileName) };
+    if (mode === 'backfill') return { ...base, ...this.backfill(drafts, hash, fileName, entries.length) };
     if (this.store.hasFile(hash)) {
       return { ...base, warnings: ['This exact file was already processed, so nothing was changed or counted twice.'] };
     }
@@ -205,11 +225,11 @@ export class Pipeline {
       for (const c of analyzed) {
         const { relatedBugIds: _a, testCaseIds: _b, ...stored } = c;
         this.store.putCluster(stored);
-        this.store.addOccurrences(c.id, freshByCluster.get(c.id)!);
+        // Every stored record remembers the file it came from, so the dashboard can show any selection of files.
+        this.store.addOccurrences(c.id, freshByCluster.get(c.id)!, hash);
       }
-      const freshTimestamps = [...freshByCluster.values()].flat().map((r) => r.timestamp);
-      this.store.addTotals(entries.length, freshTimestamps);
-      this.store.markFile(hash, fileName);
+      const totalErrors = [...freshByCluster.values()].reduce((n, rs) => n + rs.length, 0);
+      this.store.markFile(hash, fileName, { totalLogs: entries.length, totalErrors });
     });
 
     let queued = 0;
@@ -235,6 +255,7 @@ export class Pipeline {
     drafts: ReturnType<typeof clusterErrors>,
     hash: string,
     fileName: string,
+    totalLogs: number,
   ): Pick<UploadResult, 'clustersUpdated' | 'occurrencesStored' | 'warnings'> {
     let matched = 0;
     let stored = 0;
@@ -247,11 +268,12 @@ export class Pipeline {
           unmatched++;
           continue;
         }
-        stored += this.store.addOccurrences(d.id, d.records).length;
+        stored += this.store.addOccurrences(d.id, d.records, hash).length;
         matched++;
         if (this.store.occurrenceCount(d.id) !== prev.occurrences) mismatched.push(d.id);
       }
-      this.store.markFile(hash, fileName);
+      const totalErrors = drafts.reduce((n, d) => n + d.records.length, 0);
+      this.store.markFile(hash, fileName, { totalLogs, totalErrors });
     });
     const warnings: string[] = [];
     if (unmatched) warnings.push(`${unmatched} group(s) in the file have no matching cluster and were ignored.`);

@@ -5,3 +5,4 @@ export * from './bug-story.model';
 export * from './test-case.model';
 export * from './dashboard-metrics.model';
 export * from './api-response.model';
+export * from './file-info.model';

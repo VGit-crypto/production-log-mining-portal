@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { debounceTime, distinctUntilChanged, Subject, Subscription } from 'rxjs';
 import { LogEntry, OccurrencePage, OccurrenceQuery, OccurrenceSort } from '../../models';
 import { ErrorClusterService } from '../../services/error-cluster.service';
+import { FileScopeService } from '../../services/file-scope.service';
 
 /**
  * Every individual error log record behind a cluster's frequency, with server-side search, sorting and paging.
@@ -63,6 +64,7 @@ export class ClusterOccurrencesComponent {
   readonly expected = input.required<number>();
 
   private readonly svc = inject(ErrorClusterService);
+  private readonly scope = inject(FileScopeService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly columns = ['toggle', 'correlationId', 'message', 'level', 'timestamp'];
@@ -81,6 +83,7 @@ export class ClusterOccurrencesComponent {
     effect(() => {
       const id = this.clusterId();
       const q = this.query();
+      this.scope.version(); // reload when the file selection changes
       untracked(() => this.load(id, q));
     });
     this.search$

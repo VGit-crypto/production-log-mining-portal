@@ -6,7 +6,7 @@ export const environment = {
   useMockApi: false,
   mockLatencyMs: 350,
   upload: {
-    maxFileSizeMb: 50,
+    maxFileSizeMb: 200,
     acceptedExtensions: ['.json', '.ndjson'],
   },
   // Placeholders for future integrations (handled by the backend, never by the browser).

@@ -20,6 +20,10 @@ export class ApiService {
     return this.http.post<APIResponse<T>>(this.base + path, body, { context }).pipe(map((r) => r.data));
   }
 
+  delete<T>(path: string): Observable<T> {
+    return this.http.delete<APIResponse<T>>(this.base + path).pipe(map((r) => r.data));
+  }
+
   put<T>(path: string, body: unknown): Observable<T> {
     return this.http.put<APIResponse<T>>(this.base + path, body).pipe(map((r) => r.data));
   }

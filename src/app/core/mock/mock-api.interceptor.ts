@@ -43,6 +43,9 @@ export const mockApiInterceptor: HttpInterceptorFn = (req, next) => {
     return upload(req, store); // manages its own timing so progress events are visible
   } else if (req.method === 'GET' && path === '/pipeline/status') {
     res = of(ok(req, { pendingClusters: 0, failedClusters: 0 }));
+  } else if (req.method === 'DELETE' && path === '/data') {
+    store.clear();
+    res = of(ok(req, { cleared: true, backupFile: null }));
   } else if (req.method === 'GET' && path === '/dashboard/metrics') {
     res = of(ok(req, store.metrics()));
   } else if (req.method === 'GET' && path === '/clusters') {

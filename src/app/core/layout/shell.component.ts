@@ -2,12 +2,16 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { filter, map } from 'rxjs';
+import { FileScopeService } from '../../services/file-scope.service';
 import { LoadingService } from '../services/loading.service';
 
 interface NavItem {
@@ -22,6 +26,7 @@ interface NavItem {
   imports: [
     RouterOutlet, RouterLink, RouterLinkActive,
     MatSidenavModule, MatListModule, MatIconModule, MatButtonModule, MatProgressBarModule,
+    MatCheckboxModule, MatMenuModule, DecimalPipe,
   ],
   templateUrl: './shell.component.html',
   styles: `
@@ -83,6 +88,11 @@ interface NavItem {
 })
 export class ShellComponent {
   protected readonly loading = inject(LoadingService);
+  protected readonly scope = inject(FileScopeService);
+
+  constructor() {
+    this.scope.refresh(); // list the uploaded files for the selector
+  }
   protected readonly isMobile = toSignal(
     inject(BreakpointObserver).observe('(max-width: 899px)').pipe(map((r) => r.matches)),
     { initialValue: false },

@@ -128,7 +128,7 @@ All rules in this section are deterministic and live in `src/app/core/mock/log-p
 | Rule | Value |
 |---|---|
 | Extensions | `.json`, `.ndjson` |
-| Max size | 50 MB (`environment.upload.maxFileSizeMb`; server enforces `MAX_UPLOAD_MB`) |
+| Max size | 200 MB (`environment.upload.maxFileSizeMb`; server enforces `MAX_UPLOAD_MB`) |
 | Empty file | Rejected |
 | `.json` | Must be a JSON array, or an object containing an array under `logs`, `records`, `entries`, `events`, `items` or `data`, or a single object |
 | `.ndjson` | Every non-empty line must be a JSON object. The error names the first bad line (for example "line 2 is invalid") |
@@ -302,7 +302,7 @@ the bug story reuses them.
 | Total Logs Processed / Total Errors | Running totals across all uploads |
 | Unique Error Clusters | Number of clusters |
 | Critical / High / Medium / Low errors (KPI cards, second row) | **Number of clusters** at that severity; the pill shows that severity's share of all error records |
-| Errors by Severity (chart) | **Sum of occurrences** per severity |
+| Clusters by Severity (donut) | **Number of clusters** per severity; each slice's % = clusters at that severity ÷ total clusters (the centre shows the total) |
 | Errors by Module (chart) | One bar per `context` of the agent repo's `SkypadLogs-Error-report_TC.json`, valued by that entry's `totalErrorOccurrences`, highest first (entries sharing a context are summed); the first 10 are shown and the rest sit behind a **View more** button (Show less collapses it again); each name stays on one line, cut after 36 characters with `...` (the full name is in the hover tooltip). Falls back to the top 8 modules by occurrences when the report is unavailable |
 | Errors per day (computed by the API as `trend`, no longer shown on the dashboard) | Last 30 days |
 
@@ -381,14 +381,17 @@ All responses use the envelope `{ success, data, message?, errors?, timestamp }`
 | GET | `/api/health` | `{ status, aiConfigured }` |
 | POST | `/api/logs/upload` | multipart field `file` → `UploadResult`. `?mode=backfill` only attaches occurrence records to existing clusters (no count changes). The same file content twice returns a warning and changes nothing |
 | GET | `/api/pipeline/status` | `{ pendingClusters, failedClusters, lastError? }` |
-| GET | `/api/dashboard/metrics` | `DashboardMetrics` |
-| GET | `/api/clusters`, `/api/clusters/:id` | `ErrorCluster[]` / `ErrorCluster` |
+| GET | `/api/dashboard/metrics?files=` | `DashboardMetrics` for the selected files (see section 4.11) |
+| GET | `/api/files` | `FileInfo[]`: `{ id, fileName, at, totalLogs?, totalErrors?, storedRecords }` (newest first) |
+| POST | `/api/files/delete` | `{ ids: string[] }` → `{ deleted, clustersRemoved, recordsRemoved }`. Removes those files, their records, and clusters left with no records (with their bug stories and test cases) |
+| DELETE | `/api/data` | clears everything; the store file is backed up first |
+| GET | `/api/clusters?files=`, `/api/clusters/:id?files=` | `ErrorCluster[]` / `ErrorCluster`, counted from the selected files only |
 | GET | `/api/clusters/:id/occurrences?page=&pageSize=&sort=&dir=&q=` | `OccurrencePage { items, total, page, pageSize, stored }`. Server-side search (`q` over message, error, correlation id, url, context), sort (`timestamp`, `level`, `statusCode`, `phase`, `message`, `correlationId`; default newest first), `pageSize` clamped to 1 to 200 |
 | POST | `/api/clusters/:id/bug-story` | `{ force?: boolean }` → `BugStory` |
 | POST | `/api/clusters/:id/test-cases` | → `TestCase[]` |
-| GET | `/api/bug-stories?clusterId=` | `BugStory[]` |
+| GET | `/api/bug-stories?clusterId=&files=` | `BugStory[]` (only clusters in the selected files when `files` is given) |
 | PUT | `/api/bug-stories/:id` | editable `BugStory` fields → `BugStory` |
-| GET | `/api/test-cases?clusterId=` | `TestCase[]` |
+| GET | `/api/test-cases?clusterId=&files=` | `TestCase[]` (same filtering as bug stories) |
 
 `UploadResult`: `uploadId, fileName, totalRecords, errorRecords, clustersCreated, clustersUpdated,
 testCasesGenerated, testCasesQueued, warnings?`.
@@ -398,11 +401,25 @@ Status codes used: 200, 400 (bad body/multipart), 404 (unknown cluster/story/rou
 
 ---
 
+## 4.11 Multiple files and file selection
+
+Every stored error record remembers the file it came from (`fileId` = the file's SHA-256). Each file also keeps its own log and error totals.
+
+- **File selector (top bar, next to Upload logs)**: a dropdown with a checkbox per uploaded file and an **All files** shortcut. The choice applies to the whole portal: dashboard, error clusters, cluster details and occurrences, bug stories and test cases.
+- **What the numbers mean**: with a subset selected, every count is recomputed from that subset's records. A cluster that appears in two files shows only the selected file's occurrences. A cluster with no records in the selection is hidden. Severity, category and the AI bug title are taken from the stored cluster; the frequency, severity shown and the charts follow the selection.
+- **Client wiring**: the HTTP layer adds `?files=<ids>` to GET requests for `/dashboard`, `/clusters`, `/bug-stories` and `/test-cases` while a subset is selected. Pages reload when the selection changes. The selection is remembered per browser (`localStorage`).
+- **Delete**: the **Clear data** dropdown on the dashboard lists the files with checkboxes. **Delete selected** removes those files only; **Clear all data** removes everything. Both ask for confirmation and back up the store first. If a deletion removes the selected files, the view falls back to all remaining files.
+- **Uploads**: a new upload selects all files so its data appears at once.
+- **Overlap**: a record that appears in two uploads is stored once, under the first file that contained it (duplicate protection). Selecting only the second file will not show that record.
+- **Limits**: the mock mode (`npm run start:mock`) has no file tracking; the selector shows nothing there. Data stored before file tracking has no file link: clear it and re-upload the files.
+
+---
+
 ## 7. Feature walkthrough (by page)
 
 | Page (route) | What it shows | Key behavior |
 |---|---|---|
-| **Dashboard** `/dashboard` | 7 KPI cards with trend pills (3 totals, then the 4 severity levels), donut (errors by severity), bar list (errors by module), and a vertical timeline of the six most recently active clusters (newest first, each links to its cluster) | Empty state until logs are uploaded; retry on load failure |
+| **Dashboard** `/dashboard` | **Clear data** dropdown (next to the page header): tick files and **Delete selected**, or **Clear all data** (`DELETE /api/data`) after confirmation. Everything on the dashboard follows the file selector in the top bar. Clear all calls `DELETE /api/data`: clears every upload, cluster, bug story, test case and file hash. The current store file is copied to `store.backup-<timestamp>.json` first. 7 KPI cards with trend pills (3 totals, then the 4 severity levels), donut (errors by severity), bar list (errors by module), and a vertical timeline of the six most recently active clusters (newest first, each links to its cluster) | Empty state until logs are uploaded; retry on load failure |
 | **Upload Logs** `/upload` | Drag-and-drop zone, file picker, progress bar, result summary | Phases: validating → uploading (%) → processing → done. Keyboard accessible. Shows warnings and "AI is writing test cases" note |
 | **Error Clusters** `/clusters` | Material table: Cluster Id, Error Signature, Category, Severity, Occurrences, Created at (shows the cluster's last-seen time). The **Error Signature** cell shows the `Cluster` value from the agent repo's `test-results/SkypadLogs-Error-report.json` (`errors[]`) when an entry there has the same `context` as the cluster (the entry with the same URL wins if several share a context); clusters with no matching entry keep their normalized signature. The file is re-read whenever it changes (`REPORT_FILE` overrides the path) | Compact filter panel: search (id, bug title, signature, module, category), **multi-select** severity and category, a **date-range picker** on Created at, removable **filter chips** with Clear all and an "N of M clusters" count; sort on every column (severity sorts by rank), pagination 10/25/50, row click opens details |
 | **Cluster Details** `/clusters/:id` | Tabs: Overview, RCA, Related Bugs, Generated Tests. The header shows **module › context**: the application (`appName`) and the class.method that logged the error (falls back to the service, then `module`, when a log lacks these fields) | Buttons **Generate/Regenerate Bug Story** and **Generate/Regenerate Test Cases** with a busy banner. Overview shows severity, frequency (ⓘ icon opens "How this frequency is counted"), category, business impact, a **timeline** (last error, generated bug stories, first error) and **a table of every occurrence** (below) |
@@ -544,7 +561,7 @@ in the browser using the rule-based pipeline: rule-based titles, 3 generic test 
 | `PORT`, `HOST` | `3000`, `127.0.0.1` | API listen address |
 | `AI_CONCURRENCY` | `2` | Parallel AI calls (titles and test cases) |
 | `AI_RETRIES`, `AI_TIMEOUT_SECONDS` | `3`, `150` | AI resilience |
-| `MAX_UPLOAD_MB` | `50` | Upload limit |
+| `MAX_UPLOAD_MB` | `200` | Upload limit (MB) |
 | `DATA_FILE` | `server/data/store.json` | Persistence file |
 
 ---

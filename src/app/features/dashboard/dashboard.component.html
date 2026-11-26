@@ -1,4 +1,31 @@
-<app-page-header title="Dashboard" subtitle="Overview of errors mined from uploaded production logs" />
+<app-page-header title="Dashboard" subtitle="Overview of errors mined from uploaded production logs">
+  <button mat-stroked-button type="button" class="clear-btn" [matMenuTriggerFor]="clearMenu"
+          [disabled]="clearing() || !hasFiles()">
+    <mat-icon>delete_sweep</mat-icon>{{ clearing() ? 'Clearing…' : 'Clear data' }}<mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+  </button>
+  <mat-menu #clearMenu="matMenu" xPosition="before">
+    <ng-template matMenuContent>
+      <div class="menu-panel" (click)="$event.stopPropagation()">
+        <div class="menu-head"><span>Delete uploaded files</span></div>
+        @for (f of scope.files(); track f.id) {
+          <label class="file-row">
+            <mat-checkbox [checked]="isMarked(f.id)" (change)="mark(f.id)" />
+            <span class="file-name" [title]="f.fileName">{{ f.fileName }}</span>
+            <span class="file-meta">{{ (f.totalLogs ?? 0) | number }} logs</span>
+          </label>
+        } @empty {
+          <p class="file-empty">No files uploaded yet.</p>
+        }
+        <div class="clear-actions">
+          <button mat-stroked-button type="button" class="danger" [disabled]="!marked().size" (click)="confirmDeleteSelected()">
+            Delete selected ({{ marked().size }})
+          </button>
+          <button mat-flat-button type="button" class="danger-solid" (click)="confirmClear()">Clear all data</button>
+        </div>
+      </div>
+    </ng-template>
+  </mat-menu>
+</app-page-header>
 
 <app-error-boundary [loading]="metrics.loading() && !metrics.data()" [error]="metrics.error()" (retry)="metrics.load()">
   @if (metrics.data(); as m) {
@@ -32,10 +59,10 @@
         <mat-card appearance="outlined">
           <mat-card-header>
             <mat-card-title>Errors by severity</mat-card-title>
-            <mat-card-subtitle>Share of all error records, by cluster severity</mat-card-subtitle>
+            <mat-card-subtitle>Share of error clusters by severity</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
-            <app-donut-chart [data]="m.bySeverity" label="Errors by severity" centerLabel="errors" />
+            <app-donut-chart [data]="severityClusters()" label="Clusters by severity" centerLabel="clusters" />
           </mat-card-content>
         </mat-card>
         <mat-card appearance="outlined">

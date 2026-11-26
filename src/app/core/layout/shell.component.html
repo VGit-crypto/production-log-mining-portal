@@ -37,6 +37,29 @@
         <span class="crumb-current" aria-current="page">{{ currentLabel() }}</span>
       </nav>
       <span class="spacer"></span>
+      <button mat-stroked-button type="button" class="scope-btn" [matMenuTriggerFor]="filesMenu"
+              aria-label="Choose which uploaded files the portal shows">
+        <mat-icon>folder_open</mat-icon>{{ scope.label() }}<mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+      </button>
+      <mat-menu #filesMenu="matMenu" xPosition="before">
+        <ng-template matMenuContent>
+          <div class="menu-panel" (click)="$event.stopPropagation()">
+            <div class="menu-head">
+              <span>Show data from</span>
+              <button mat-button type="button" (click)="scope.selectAll()">All files</button>
+            </div>
+            @for (f of scope.files(); track f.id) {
+              <label class="file-row">
+                <mat-checkbox [checked]="scope.isSelected(f.id)" (change)="scope.toggle(f.id)" />
+                <span class="file-name" [title]="f.fileName">{{ f.fileName }}</span>
+                <span class="file-meta">{{ (f.totalLogs ?? 0) | number }} logs</span>
+              </label>
+            } @empty {
+              <p class="file-empty">No files uploaded yet.</p>
+            }
+          </div>
+        </ng-template>
+      </mat-menu>
       <a mat-flat-button routerLink="/upload"><mat-icon>cloud_upload</mat-icon>Upload logs</a>
       <div class="progress" aria-hidden="true">
         @if (loading.isLoading()) { <mat-progress-bar mode="indeterminate" /> }

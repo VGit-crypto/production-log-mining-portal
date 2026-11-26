@@ -2,6 +2,7 @@ import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular
 import { inject } from '@angular/core';
 import { catchError, finalize, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { FileScopeService } from '../../services/file-scope.service';
 import { LoadingService } from '../services/loading.service';
 import { NotificationService } from '../services/notification.service';
 
@@ -58,4 +59,20 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       return throwError(() => new ApiError(message, err.status, body?.errors ?? []));
     }),
   );
+};
+
+/** Data endpoints that follow the file selection (the server filters them by ?files=). */
+const FILE_SCOPED = ['/dashboard/', '/clusters', '/bug-stories', '/test-cases'];
+
+/**
+ * Adds ?files=<selected ids> to GET requests for file-scoped data while a subset of files is selected, so every
+ * page shows the same selection without each service knowing about it.
+ */
+export const fileScopeInterceptor: HttpInterceptorFn = (req, next) => {
+  if (!isApi(req.url) || req.method !== 'GET') return next(req);
+  const path = req.url.slice(environment.apiBaseUrl.length);
+  if (!FILE_SCOPED.some((p) => path.startsWith(p))) return next(req);
+  const param = inject(FileScopeService).param();
+  if (param === null || req.params.has('files')) return next(req);
+  return next(req.clone({ setParams: { files: param } }));
 };

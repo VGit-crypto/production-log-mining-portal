@@ -381,3 +381,89 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+// ---------------------------------------------------------------- File selector and file-delete menus
+/* Material caps menu panels at 280px; these menus hold file lists and buttons, so let them be wider. */
+.mat-mdc-menu-panel:has(.menu-panel) {
+  max-width: 440px !important;
+}
+
+.menu-panel {
+  min-width: 340px;
+  padding: 8px 0;
+}
+
+.menu-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--n-500);
+  border-bottom: 1px solid var(--n-100);
+}
+
+.file-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background: var(--n-50);
+  }
+}
+
+.file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--n-900);
+}
+
+.file-meta {
+  font-size: 12px;
+  color: var(--n-500);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.file-empty {
+  margin: 0;
+  padding: 16px;
+  color: var(--n-500);
+  font-size: 14px;
+}
+
+.clear-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 16px 4px;
+  border-top: 1px solid var(--n-100);
+  margin-top: 8px;
+}
+
+.danger,
+.danger-solid {
+  font-weight: 600;
+}
+
+.danger:not(:disabled) {
+  --mat-button-outlined-label-text-color: #b91c1c;
+  --mat-button-outlined-outline-color: #fca5a5;
+}
+
+.danger-solid:not(:disabled) {
+  --mat-button-filled-container-color: #dc2626;
+  --mat-button-filled-label-text-color: #ffffff;
+}

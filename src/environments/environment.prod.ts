@@ -4,7 +4,7 @@ export const environment = {
   useMockApi: false,
   mockLatencyMs: 0,
   upload: {
-    maxFileSizeMb: 50,
+    maxFileSizeMb: 200,
     acceptedExtensions: ['.json', '.ndjson'],
   },
   integrations: { jira: { enabled: false }, qmetry: { enabled: false } },

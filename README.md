@@ -45,7 +45,7 @@ Notes on how the agent output maps to the portal:
 
 The agents' `AIProvider` needs `API_URL`, `API_KEY` and `MODEL_NAME`. The server loads, in order (existing environment
 variables always win): `server/.env`, then `<AGENT_REPO_PATH>/.env`, so by default it reuses the agent repo's `.env`.
-Other options: `PORT` (3000), `HOST` (127.0.0.1), `AI_CONCURRENCY` (2), `MAX_UPLOAD_MB` (50), `DATA_FILE`
+Other options: `PORT` (3000), `HOST` (127.0.0.1), `AI_CONCURRENCY` (2), `MAX_UPLOAD_MB` (200), `DATA_FILE`
 (`server/data/store.json`). The API has no authentication, so keep it on localhost or put it behind your gateway.
 
 Only these fields reach the model: `appName, service, context, url, statusCode, message, error` (as in the agent repo).

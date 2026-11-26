@@ -31,7 +31,7 @@ export const KB_FILE = path.resolve(
 
 export const PORT =Number(process.env['PORT'] ?? 3000);
 export const HOST = process.env['HOST'] ?? '127.0.0.1';
-export const MAX_UPLOAD_BYTES = Number(process.env['MAX_UPLOAD_MB'] ?? 50) * 1024 * 1024;
+export const MAX_UPLOAD_BYTES = Number(process.env['MAX_UPLOAD_MB'] ?? 200) * 1024 * 1024;
 export const AI_CONCURRENCY = Math.max(1, Number(process.env['AI_CONCURRENCY'] ?? 2));
 /** Retries for transient AI failures (5xx / 429 / network) and the per-call timeout. */
 export const AI_RETRIES = Math.max(0, Number(process.env['AI_RETRIES'] ?? 3));
